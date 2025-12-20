@@ -21,7 +21,7 @@ export default function PaymentPage() {
       return;
     }
     Alert.alert('Payment Success', `You have paid ${totalAmount} EGP`);
-    router.replace('/Login'); // Redirect after payment (optional)
+    router.replace('/'); // Redirect after payment (optional)
   };
 
   const handleCancel = () => {
