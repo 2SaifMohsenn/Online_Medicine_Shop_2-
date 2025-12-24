@@ -14,9 +14,9 @@ class Medicine(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     category = models.CharField(
-        max_length=50, 
-        choices=CATEGORY_CHOICES, 
-        default='Vitamins'  # <-- default set here
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='Vitamins'
     )
     price = models.DecimalField(max_digits=8, decimal_places=2)
     stock = models.PositiveIntegerField()
@@ -41,6 +41,7 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} by {self.user.first_name} {self.user.last_name}"
 
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
@@ -50,17 +51,6 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.medicine.name}"
 
-# -----------------------
-# Shipping Address Model
-# -----------------------
-class ShippingAddress(models.Model):
-    street_address = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=20)
-
-    def __str__(self):
-        return f"{self.street_address}, {self.city}"
 
 # -----------------------
 # Custom User Model
@@ -70,10 +60,11 @@ class User(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
-    shipping_address = models.OneToOneField(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
+    shipping_address = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
 
 # -----------------------
 # Admin Model

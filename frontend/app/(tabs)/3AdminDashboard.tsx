@@ -1,206 +1,58 @@
-// import { Link } from 'expo-router';
-// import React from 'react';
-// import {
-//   ScrollView,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-
-// export default function AdminDashboard() {
-//   // Temporary placeholder data
-//   const totalUsers = 120;
-//   const totalOrdersToday = 35;
-//   const totalRevenue = 1250;
-//   const lowStockMedicines = 5;
-
-//   return (
-//     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-//       {/* Header with profile */}
-//       <View style={styles.headerRow}>
-//         <Text style={styles.header}>Dashboard</Text>
-
-//         <Link href="/3AdminProfile" asChild>
-//           <TouchableOpacity style={styles.profileButton}>
-//             <Text style={styles.profileText}>Admin</Text>
-//           </TouchableOpacity>
-//         </Link>
-//       </View>
-
-//       {/* Top Quick Access Bar */}
-//       <View style={styles.topBar}>
-//         <Link href="/3ProductMangment" asChild>
-//           <TouchableOpacity style={styles.topBarButton}>
-//             <Text style={styles.topBarText}>Products</Text>
-//           </TouchableOpacity>
-//         </Link>
-
-//         <Link href="/3Orders" asChild>
-//           <TouchableOpacity style={styles.topBarButton}>
-//             <Text style={styles.topBarText}>Orders</Text>
-//           </TouchableOpacity>
-//         </Link>
-
-//         <Link href="/3Users" asChild>
-//           <TouchableOpacity style={styles.topBarButton}>
-//             <Text style={styles.topBarText}>Users</Text>
-//           </TouchableOpacity>
-//         </Link>
-//       </View>
-
-//       {/* Dashboard summary cards */}
-//       <View style={styles.cardsRow}>
-//         <View style={styles.card}>
-//           <Text style={styles.cardTitle}>Users</Text>
-//           <Text style={styles.cardValue}>{totalUsers}</Text>
-//         </View>
-
-//         <View style={styles.card}>
-//           <Text style={styles.cardTitle}>Orders Today</Text>
-//           <Text style={styles.cardValue}>{totalOrdersToday}</Text>
-//         </View>
-//       </View>
-
-//       <View style={styles.cardsRow}>
-//         <View style={styles.card}>
-//           <Text style={styles.cardTitle}>Revenue</Text>
-//           <Text style={styles.cardValue}>${totalRevenue}</Text>
-//         </View>
-
-//         <View style={styles.card}>
-//           <Text style={styles.cardTitle}>Low Stock</Text>
-//           <Text style={[styles.cardValue, { color: '#E57373' }]}>
-//             {lowStockMedicines}
-//           </Text>
-//         </View>
-//       </View>
-//     </ScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#F8F9FA',
-//     padding: 20,
-//   },
-
-//   /* Header */
-//   headerRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: 16,
-//   },
-//   header: {
-//     fontSize: 26,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//     letterSpacing: 0.5,
-//   },
-//   profileButton: {
-//     backgroundColor: '#E3F2FD',
-//     paddingVertical: 8,
-//     paddingHorizontal: 14,
-//     borderRadius: 20,
-//   },
-//   profileText: {
-//     color: '#2E8BC0',
-//     fontWeight: 'bold',
-//     fontSize: 14,
-//   },
-
-//   /* Top bar */
-//   topBar: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     backgroundColor: '#FFFFFF',
-//     borderRadius: 14,
-//     padding: 10,
-//     marginBottom: 20,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.08,
-//     shadowRadius: 4,
-//     elevation: 3,
-//   },
-//   topBarButton: {
-//     flex: 1,
-//     marginHorizontal: 4,
-//     backgroundColor: '#2E8BC0',
-//     paddingVertical: 10,
-//     borderRadius: 10,
-//     alignItems: 'center',
-//   },
-//   topBarText: {
-//     color: '#FFFFFF',
-//     fontSize: 14,
-//     fontWeight: 'bold',
-//   },
-
-//   /* Cards */
-//   cardsRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     marginBottom: 12,
-//   },
-//   card: {
-//     flex: 1,
-//     backgroundColor: '#FFFFFF',
-//     marginHorizontal: 6,
-//     borderRadius: 16,
-//     paddingVertical: 18,
-//     paddingHorizontal: 14,
-//     alignItems: 'center',
-//     shadowColor: '#000000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.08,
-//     shadowRadius: 3,
-//     elevation: 2,
-//   },
-//   cardTitle: {
-//     fontSize: 15,
-//     color: '#555555',
-//     marginBottom: 6,
-//   },
-//   cardValue: {
-//     fontSize: 22,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//   },
-// });
-
-
 import { Link } from 'expo-router';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { getUser } from '@/constants/userStorage';
+import { getDashboardStats } from '@/constants/api';
 
 export default function AdminDashboard() {
-  // Temporary placeholder data
-  const totalUsers = 120;
-  const totalOrdersToday = 35;
-  const totalRevenue = 1250;
-  const lowStockMedicines = 5;
+  const admin = getUser();
+  const adminName = admin ? `${admin.first_name}` : 'Admin';
+
+  // Stats state
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [lowStockMedicines, setLowStockMedicines] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch stats on mount
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const stats = await getDashboardStats();
+      setTotalUsers(stats.total_users);
+      setTotalOrders(stats.total_orders);
+      setTotalRevenue(stats.total_revenue);
+      setLowStockMedicines(stats.low_stock_count);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header with profile */}
       <View style={styles.headerRow}>
-        <Text style={styles.header}>Dashboard</Text>
+        <Text style={styles.header}>Welcome, {adminName}!</Text>
 
         <Link href="/3AdminProfile" asChild>
           <TouchableOpacity style={styles.profileButton}>
-            <Text style={styles.profileText}>Admin</Text>
+            <Text style={styles.profileText}>{adminName}</Text>
           </TouchableOpacity>
         </Link>
-        
+
       </View>
 
       {/* Top Quick Access Bar */}
@@ -226,31 +78,39 @@ export default function AdminDashboard() {
 
       {/* Centered Statistics Cards */}
       <View style={styles.statsContainer}>
-        <View style={styles.cardsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.cardTitle}>Users</Text>
-            <Text style={styles.cardValue}>{totalUsers}</Text>
-          </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#2E8BC0" />
+        ) : (
+          <>
+            <View style={styles.cardsRow}>
+              <Link href="/3Users" asChild>
+                <TouchableOpacity style={styles.statCard}>
+                  <Text style={styles.cardTitle}>Users</Text>
+                  <Text style={styles.cardValue}>{totalUsers}</Text>
+                </TouchableOpacity>
+              </Link>
 
-          <View style={styles.statCard}>
-            <Text style={styles.cardTitle}>Orders Today</Text>
-            <Text style={styles.cardValue}>{totalOrdersToday}</Text>
-          </View>
-        </View>
+              <View style={styles.statCard}>
+                <Text style={styles.cardTitle}>Total Orders</Text>
+                <Text style={styles.cardValue}>{totalOrders}</Text>
+              </View>
+            </View>
 
-        <View style={styles.cardsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.cardTitle}>Revenue</Text>
-            <Text style={styles.cardValue}>${totalRevenue}</Text>
-          </View>
+            <View style={styles.cardsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.cardTitle}>Revenue</Text>
+                <Text style={styles.cardValue}>{totalRevenue} EGP</Text>
+              </View>
 
-          <View style={styles.statCard}>
-            <Text style={styles.cardTitle}>Low Stock</Text>
-            <Text style={[styles.cardValue, { color: '#E57373' }]}>
-              {lowStockMedicines}
-            </Text>
-          </View>
-        </View>
+              <View style={styles.statCard}>
+                <Text style={styles.cardTitle}>Low Stock</Text>
+                <Text style={[styles.cardValue, { color: lowStockMedicines > 0 ? '#E57373' : '#4CAF50' }]}>
+                  {lowStockMedicines}
+                </Text>
+              </View>
+            </View>
+          </>
+        )}
       </View>
     </ScrollView>
   );

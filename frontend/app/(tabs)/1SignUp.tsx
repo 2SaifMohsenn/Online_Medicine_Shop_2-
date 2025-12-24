@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { signup } from '@/constants/api';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -18,21 +20,41 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!name || !email || !password || !address) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
 
-    // Temporary success message (until backend is connected)
-    Alert.alert(
-      'Signup Successful',
-      `Name: ${name}\nEmail: ${email}\nAddress: ${address}`
-    );
+    setIsLoading(true);
 
-    // Navigate to login page
-    router.push('/');
+    try {
+      const response = await signup({
+        name,
+        email,
+        password,
+        phone,
+        address,
+      });
+
+      Alert.alert(
+        'Signup Successful',
+        `Welcome, ${response.user?.first_name}! Please login to continue.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => router.push('/'),
+          },
+        ]
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Signup failed';
+      Alert.alert('Error', message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,8 +107,16 @@ export default function SignupPage() {
 
 
 
-        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-          <Text style={styles.signupText}>Sign Up</Text>
+        <TouchableOpacity
+          style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+          onPress={handleSignup}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.signupText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -136,6 +166,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
+  },
+  signupButtonDisabled: {
+    opacity: 0.7,
   },
   signupText: {
     color: '#fff',

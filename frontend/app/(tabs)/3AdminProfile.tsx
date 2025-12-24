@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,16 +10,99 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { getUser, saveUser } from '@/constants/userStorage';
+import { updateAdminProfile, changePassword } from '@/constants/api';
 
 export default function AdminProfile() {
   const router = useRouter();
+  const storedAdmin = getUser();
 
-  // Temporary admin data (replace with API data later)
-  const admin = {
-    firstName: 'Saif',
-    lastName: 'Mohsen',
-    email: 'admin@osra.com',
-    phone: '+20 100 123 4567',
+  // Editable fields state
+  const [firstName, setFirstName] = useState(storedAdmin?.first_name || 'Admin');
+  const [lastName, setLastName] = useState(storedAdmin?.last_name || 'User');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Password fields state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const email = storedAdmin?.email || 'admin@example.com';
+
+  const handleSaveProfile = async () => {
+    if (!storedAdmin?.id) {
+      Alert.alert('Error', 'Please login first');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await updateAdminProfile({
+        admin_id: storedAdmin.id,
+        first_name: firstName,
+        last_name: lastName,
+      });
+
+      // Update local storage
+      if (response.user) {
+        saveUser({
+          ...response.user,
+          role: 'admin',
+        });
+      }
+
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Update failed';
+      Alert.alert('Error', message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!storedAdmin?.id) {
+      Alert.alert('Error', 'Please login first');
+      return;
+    }
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all password fields');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 3) {
+      Alert.alert('Error', 'Password must be at least 3 characters');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await changePassword({
+        user_id: storedAdmin.id,
+        role: 'admin',
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+
+      // Clear password fields
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      Alert.alert('Success', 'Password changed successfully!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Password change failed';
+      Alert.alert('Error', message);
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -27,14 +112,14 @@ export default function AdminProfile() {
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {admin.firstName.charAt(0)}
-              {admin.lastName.charAt(0)}
+              {firstName.charAt(0)}
+              {lastName.charAt(0)}
             </Text>
           </View>
           <Text style={styles.name}>
-            {admin.firstName} {admin.lastName}
+            {firstName} {lastName}
           </Text>
-          <Text style={styles.email}>{admin.email}</Text>
+          <Text style={styles.email}>{email}</Text>
         </View>
 
         {/* Logout Button */}
@@ -52,38 +137,43 @@ export default function AdminProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>First Name</Text>
           <TextInput
-            value={admin.firstName}
-            editable={false}
-            style={styles.inputDisabled}
+            value={firstName}
+            onChangeText={setFirstName}
+            style={styles.input}
+            placeholder="Enter first name"
           />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Last Name</Text>
           <TextInput
-            value={admin.lastName}
-            editable={false}
-            style={styles.inputDisabled}
+            value={lastName}
+            onChangeText={setLastName}
+            style={styles.input}
+            placeholder="Enter last name"
           />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Email</Text>
           <TextInput
-            value={admin.email}
+            value={email}
             editable={false}
             style={styles.inputDisabled}
           />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Phone</Text>
-          <TextInput
-            value={admin.phone}
-            editable={false}
-            style={styles.inputDisabled}
-          />
-        </View>
+        <TouchableOpacity
+          style={[styles.saveButton, isUpdating && styles.buttonDisabled]}
+          onPress={handleSaveProfile}
+          disabled={isUpdating}
+        >
+          {isUpdating ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Change Password */}
@@ -93,6 +183,8 @@ export default function AdminProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>Current Password</Text>
           <TextInput
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
             placeholder="Enter current password"
             secureTextEntry
             style={styles.input}
@@ -102,6 +194,8 @@ export default function AdminProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>New Password</Text>
           <TextInput
+            value={newPassword}
+            onChangeText={setNewPassword}
             placeholder="Enter new password"
             secureTextEntry
             style={styles.input}
@@ -111,14 +205,24 @@ export default function AdminProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>Confirm New Password</Text>
           <TextInput
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             placeholder="Confirm new password"
             secureTextEntry
             style={styles.input}
           />
         </View>
 
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>Update Password</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, isChangingPassword && styles.buttonDisabled]}
+          onPress={handleChangePassword}
+          disabled={isChangingPassword}
+        >
+          {isChangingPassword ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Update Password</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -222,6 +326,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    color: '#1F2937',
   },
   inputDisabled: {
     backgroundColor: '#F1F5F9',
@@ -236,11 +341,14 @@ const styles = StyleSheet.create({
 
   /* Button */
   saveButton: {
-    backgroundColor: '#2E8BC0',
+    backgroundColor: '#4CAF50',
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   saveButtonText: {
     color: '#FFFFFF',
