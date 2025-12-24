@@ -1,16 +1,55 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { login } from '@/constants/api';
+import { saveUser, clearUser } from '@/constants/userStorage';
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Link, useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    alert(`Email: ${email}\nPassword: ${password}`);
+  // Clear user data when landing on login page
+  useEffect(() => {
+    clearUser();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await login({ email, password });
+
+      // Save user data to storage
+      if (response.user && response.role) {
+        saveUser({
+          ...response.user,
+          role: response.role,
+        });
+      }
+
+      // Navigate based on role
+      if (response.role === 'admin') {
+        router.replace('/3AdminDashboard');
+      } else {
+        router.replace('/HomePage');
+      }
+
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed';
+      Alert.alert('Login Failed', message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -22,11 +61,11 @@ export default function LoginScreen() {
         />
 
         <ThemedText type="title" style={styles.title}>
-          Welcome Back 
+          Welcome Back
         </ThemedText>
-        
-        
-        
+
+
+
 
         <TextInput
           style={styles.input}
@@ -35,6 +74,7 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         <TextInput
@@ -46,8 +86,16 @@ export default function LoginScreen() {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <ThemedText style={styles.loginButtonText}>Login</ThemedText>
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <ThemedText style={styles.loginButtonText}>Login</ThemedText>
+          )}
         </TouchableOpacity>
 
         <ThemedText style={styles.footerText}>
@@ -69,15 +117,15 @@ export default function LoginScreen() {
         </ThemedText>
 
         <ThemedText style={styles.footerText}>
-        Go To The Home Page{' '}
-        <Link href="/HomePage" >
-        <ThemedText type="link" style={styles.Link}>
-        HOME PAGE
-        </ThemedText>
-        </Link>
+          Go To The Home Page{' '}
+          <Link href="/HomePage" >
+            <ThemedText type="link" style={styles.Link}>
+              HOME PAGE
+            </ThemedText>
+          </Link>
         </ThemedText>
 
-        
+
       </View>
     </ThemedView>
   );
@@ -138,6 +186,9 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 10,
+  },
+  loginButtonDisabled: {
+    opacity: 0.7,
   },
   loginButtonText: {
     color: '#fff',

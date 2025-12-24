@@ -1,772 +1,6 @@
-// // AdminProducts.tsx
-// import React, { useState } from 'react';
-// import {
-//     Alert,
-//     FlatList,
-//     Modal,
-//     StyleSheet,
-//     Text,
-//     TextInput,
-//     TouchableOpacity,
-//     View,
-// } from 'react-native';
-
-// // ✅ Define types
-// type Product = {
-//   id: string;
-//   name: string;
-//   category: string;
-//   price: number;
-//   stock: number;
-// };
-
-// type FormData = {
-//   name: string;
-//   category: string;
-//   price: string;
-//   stock: string;
-// };
-
-// export default function AdminProducts() {
-//   const [products, setProducts] = useState<Product[]>([
-//     { id: '1', name: 'Paracetamol', category: 'Pain Relief', price: 25, stock: 50 },
-//     { id: '2', name: 'Amoxicillin', category: 'Antibiotic', price: 45, stock: 20 },
-//     { id: '3', name: 'Vitamin C', category: 'Supplements', price: 15, stock: 100 },
-//   ]);
-
-//   const [search, setSearch] = useState('');
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-//   const [formData, setFormData] = useState<FormData>({
-//     name: '',
-//     category: '',
-//     price: '',
-//     stock: '',
-//   });
-
-//   const openModal = (product: Product | null = null) => {
-//     if (product) {
-//       setEditingProduct(product);
-//       setFormData({
-//         name: product.name,
-//         category: product.category,
-//         price: product.price.toString(),
-//         stock: product.stock.toString(),
-//       });
-//     } else {
-//       setEditingProduct(null);
-//       setFormData({ name: '', category: '', price: '', stock: '' });
-//     }
-//     setModalVisible(true);
-//   };
-
-//   const handleSave = () => {
-//     if (!formData.name || !formData.category || !formData.price || !formData.stock) {
-//       Alert.alert('Error', 'Please fill all fields');
-//       return;
-//     }
-
-//     if (editingProduct) {
-//       setProducts((prev) =>
-//         prev.map((p) =>
-//           p.id === editingProduct.id
-//             ? {
-//                 ...p,
-//                 name: formData.name,
-//                 category: formData.category,
-//                 price: parseFloat(formData.price),
-//                 stock: parseInt(formData.stock, 10),
-//               }
-//             : p
-//         )
-//       );
-//       Alert.alert('Success', 'Product updated successfully!');
-//     } else {
-//       const newProduct: Product = {
-//         id: Date.now().toString(),
-//         name: formData.name,
-//         category: formData.category,
-//         price: parseFloat(formData.price),
-//         stock: parseInt(formData.stock, 10),
-//       };
-//       setProducts((prev) => [...prev, newProduct]);
-//       Alert.alert('Success', 'New product added!');
-//     }
-
-//     setModalVisible(false);
-//     setFormData({ name: '', category: '', price: '', stock: '' });
-//     setEditingProduct(null);
-//   };
-
-//   const handleDelete = (id: string) => {
-//     Alert.alert('Confirm Delete', 'Are you sure you want to delete this product?', [
-//       { text: 'Cancel', style: 'cancel' },
-//       {
-//         text: 'Delete',
-//         style: 'destructive',
-//         onPress: () => {
-//           setProducts((prev) => prev.filter((p) => p.id !== id));
-//         },
-//       },
-//     ]);
-//   };
-
-//   const filteredProducts = products.filter(
-//     (item) =>
-//       item.name.toLowerCase().includes(search.toLowerCase()) ||
-//       item.category.toLowerCase().includes(search.toLowerCase())
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Product Management</Text>
-
-//       <TextInput
-//         style={styles.searchInput}
-//         placeholder="Search by name or category..."
-//         placeholderTextColor="#888"
-//         value={search}
-//         onChangeText={setSearch}
-//       />
-
-//       <TouchableOpacity style={styles.addButton} onPress={() => openModal()}>
-//         <Text style={styles.addButtonText}>+ Add New Product</Text>
-//       </TouchableOpacity>
-
-//       <FlatList
-//         data={filteredProducts}
-//         keyExtractor={(item) => item.id}
-//         renderItem={({ item }) => (
-//           <View style={styles.card}>
-//             <View style={{ flex: 1 }}>
-//               <Text style={styles.productName}>{item.name}</Text>
-//               <Text style={styles.productInfo}>Category: {item.category}</Text>
-//               <Text style={styles.productInfo}>Price: ${item.price}</Text>
-//               <Text style={styles.productInfo}>Stock: {item.stock}</Text>
-//             </View>
-
-//             <View style={styles.actionButtons}>
-//               <TouchableOpacity style={styles.editButton} onPress={() => openModal(item)}>
-//                 <Text style={styles.actionText}>Edit</Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 style={styles.deleteButton}
-//                 onPress={() => handleDelete(item.id)}>
-//                 <Text style={styles.actionText}>Delete</Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         )}
-//       />
-
-//       {/* Modal */}
-//       <Modal visible={modalVisible} animationType="slide" transparent>
-//         <View style={styles.modalOverlay}>
-//           <View style={styles.modalContainer}>
-//             <Text style={styles.modalTitle}>
-//               {editingProduct ? 'Edit Product' : 'Add New Product'}
-//             </Text>
-
-//             <TextInput
-//               style={styles.modalInput}
-//               placeholder="Product Name"
-//               placeholderTextColor="#888"
-//               value={formData.name}
-//               onChangeText={(text) => setFormData((s) => ({ ...s, name: text }))}
-//             />
-//             <TextInput
-//               style={styles.modalInput}
-//               placeholder="Category"
-//               placeholderTextColor="#888"
-//               value={formData.category}
-//               onChangeText={(text) => setFormData((s) => ({ ...s, category: text }))}
-//             />
-//             <TextInput
-//               style={styles.modalInput}
-//               placeholder="Price"
-//               placeholderTextColor="#888"
-//               keyboardType="numeric"
-//               value={formData.price}
-//               onChangeText={(text) => setFormData((s) => ({ ...s, price: text }))}
-//             />
-//             <TextInput
-//               style={styles.modalInput}
-//               placeholder="Stock Quantity"
-//               placeholderTextColor="#888"
-//               keyboardType="numeric"
-//               value={formData.stock}
-//               onChangeText={(text) => setFormData((s) => ({ ...s, stock: text }))}
-//             />
-
-//             <View style={styles.modalButtons}>
-//               <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-//                 <Text style={styles.saveText}>{editingProduct ? 'Update' : 'Save'}</Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 style={styles.cancelButton}
-//                 onPress={() => {
-//                   setModalVisible(false);
-//                   setEditingProduct(null);
-//                 }}>
-//                 <Text style={styles.cancelText}>Cancel</Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-//     </View>
-//   );
-// }
-
-// // Styles
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#F8F9FA',
-//     padding: 16,
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//     marginBottom: 16,
-//   },
-//   searchInput: {
-//     backgroundColor: '#FFFFFF',
-//     borderRadius: 8,
-//     padding: 10,
-//     borderWidth: 1,
-//     borderColor: '#CCC',
-//     marginBottom: 12,
-//     color: '#333333',
-//   },
-//   addButton: {
-//     backgroundColor: '#2E8BC0',
-//     borderRadius: 8,
-//     padding: 12,
-//     alignItems: 'center',
-//     marginBottom: 16,
-//   },
-//   addButtonText: {
-//     color: '#FFFFFF',
-//     fontWeight: 'bold',
-//     fontSize: 16,
-//   },
-//   card: {
-//     backgroundColor: '#FFFFFF',
-//     borderRadius: 10,
-//     padding: 12,
-//     marginBottom: 12,
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 2,
-//     elevation: 2,
-//   },
-//   productName: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//   },
-//   productInfo: {
-//     color: '#333333',
-//     marginTop: 2,
-//   },
-//   actionButtons: {
-//     justifyContent: 'space-between',
-//     marginLeft: 12,
-//     alignItems: 'flex-end',
-//   },
-//   editButton: {
-//     backgroundColor: '#A1D9A6',
-//     borderRadius: 6,
-//     paddingVertical: 6,
-//     paddingHorizontal: 10,
-//     marginBottom: 6,
-//   },
-//   deleteButton: {
-//     backgroundColor: '#E57373',
-//     borderRadius: 6,
-//     paddingVertical: 6,
-//     paddingHorizontal: 10,
-//   },
-//   actionText: {
-//     color: '#FFFFFF',
-//     fontWeight: 'bold',
-//   },
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: 'rgba(0,0,0,0.4)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   modalContainer: {
-//     backgroundColor: '#FFFFFF',
-//     borderRadius: 12,
-//     padding: 20,
-//     width: '85%',
-//   },
-//   modalTitle: {
-//     fontSize: 20,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//     marginBottom: 16,
-//     textAlign: 'center',
-//   },
-//   modalInput: {
-//     borderWidth: 1,
-//     borderColor: '#CCC',
-//     borderRadius: 8,
-//     padding: 10,
-//     marginBottom: 10,
-//     color: '#333333',
-//   },
-//   modalButtons: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     marginTop: 10,
-//   },
-//   saveButton: {
-//     backgroundColor: '#2E8BC0',
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     borderRadius: 8,
-//   },
-//   saveText: {
-//     color: '#FFFFFF',
-//     fontWeight: 'bold',
-//   },
-//   cancelButton: {
-//     backgroundColor: '#E57373',
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     borderRadius: 8,
-//   },
-//   cancelText: {
-//     color: '#FFFFFF',
-//     fontWeight: 'bold',
-//   },
-// });
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState } from 'react';
-// import {
-//   Alert,
-//   FlatList,
-//   Image,
-//   Modal,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-// } from 'react-native';
-// import * as ImagePicker from 'expo-image-picker';
-// import { Picker } from '@react-native-picker/picker';
-
-// // Types
-// type Product = {
-//   id: string;
-//   name: string;
-//   category: string;
-//   price: number;
-//   stock: number;
-//   image?: string;
-// };
-
-// type FormData = {
-//   name: string;
-//   category: string;
-//   price: string;
-//   stock: string;
-//   image?: string;
-// };
-
-// const CATEGORIES = [
-//   'Vitamins',
-//   'Hair Care',
-//   'Pain Relief',
-//   'Cold & Flu',
-// ];
-
-// export default function AdminProducts() {
-//   const [products, setProducts] = useState<Product[]>([]);
-//   const [search, setSearch] = useState('');
-//   const [modalVisible, setModalVisible] = useState(false);
-//   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-//   const [formData, setFormData] = useState<FormData>({
-//     name: '',
-//     category: CATEGORIES[0],
-//     price: '',
-//     stock: '',
-//     image: undefined,
-//   });
-
-//   // Open modal
-//   const openModal = (product: Product | null = null) => {
-//     if (product) {
-//       setEditingProduct(product);
-//       setFormData({
-//         name: product.name,
-//         category: product.category,
-//         price: product.price.toString(),
-//         stock: product.stock.toString(),
-//         image: product.image,
-//       });
-//     } else {
-//       setEditingProduct(null);
-//       setFormData({
-//         name: '',
-//         category: CATEGORIES[0],
-//         price: '',
-//         stock: '',
-//         image: undefined,
-//       });
-//     }
-//     setModalVisible(true);
-//   };
-
-//   // Image picker
-//   const pickImage = async () => {
-//     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-//     if (!permission.granted) {
-//       Alert.alert('Permission required', 'Please allow gallery access');
-//       return;
-//     }
-
-//     const result = await ImagePicker.launchImageLibraryAsync({
-//       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//       quality: 0.7,
-//     });
-
-//     if (!result.canceled) {
-//       setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
-//     }
-//   };
-
-//   // Save product
-//   const handleSave = () => {
-//     if (!formData.name || !formData.price || !formData.stock) {
-//       Alert.alert('Error', 'Please fill all fields');
-//       return;
-//     }
-
-//     if (editingProduct) {
-//       setProducts((prev) =>
-//         prev.map((p) =>
-//           p.id === editingProduct.id
-//             ? {
-//                 ...p,
-//                 ...formData,
-//                 price: parseFloat(formData.price),
-//                 stock: parseInt(formData.stock, 10),
-//               }
-//             : p
-//         )
-//       );
-//     } else {
-//       setProducts((prev) => [
-//         ...prev,
-//         {
-//           id: Date.now().toString(),
-//           name: formData.name,
-//           category: formData.category,
-//           price: parseFloat(formData.price),
-//           stock: parseInt(formData.stock, 10),
-//           image: formData.image,
-//         },
-//       ]);
-//     }
-
-//     setModalVisible(false);
-//   };
-
-//   const handleDelete = (id: string) => {
-//     Alert.alert('Delete Product', 'Are you sure?', [
-//       { text: 'Cancel', style: 'cancel' },
-//       {
-//         text: 'Delete',
-//         style: 'destructive',
-//         onPress: () =>
-//           setProducts((prev) => prev.filter((p) => p.id !== id)),
-//       },
-//     ]);
-//   };
-
-//   const filteredProducts = products.filter(
-//     (p) =>
-//       p.name.toLowerCase().includes(search.toLowerCase()) ||
-//       p.category.toLowerCase().includes(search.toLowerCase())
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Admin · Products</Text>
-
-//       <TextInput
-//         style={styles.searchInput}
-//         placeholder="Search products..."
-//         value={search}
-//         onChangeText={setSearch}
-//       />
-
-//       <TouchableOpacity style={styles.addButton} onPress={() => openModal()}>
-//         <Text style={styles.addButtonText}>＋ Add Product</Text>
-//       </TouchableOpacity>
-
-//       <FlatList
-//         data={filteredProducts}
-//         keyExtractor={(item) => item.id}
-//         renderItem={({ item }) => (
-//           <View style={styles.card}>
-//             {item.image && (
-//               <Image source={{ uri: item.image }} style={styles.productImage} />
-//             )}
-
-//             <View style={{ flex: 1 }}>
-//               <Text style={styles.productName}>{item.name}</Text>
-//               <Text style={styles.categoryBadge}>{item.category}</Text>
-//               <Text style={styles.info}>Price: {item.price} EGP</Text>
-//               <Text style={styles.info}>Stock: {item.stock}</Text>
-//             </View>
-
-//             <View style={styles.actions}>
-//               <TouchableOpacity
-//                 style={styles.editButton}
-//                 onPress={() => openModal(item)}>
-//                 <Text style={styles.actionText}>Edit</Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 style={styles.deleteButton}
-//                 onPress={() => handleDelete(item.id)}>
-//                 <Text style={styles.actionText}>Delete</Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         )}
-//       />
-
-//       {/* Modal */}
-//       <Modal visible={modalVisible} transparent animationType="slide">
-//         <View style={styles.modalOverlay}>
-//           <View style={styles.modal}>
-//             <Text style={styles.modalTitle}>
-//               {editingProduct ? 'Edit Product' : 'Add Product'}
-//             </Text>
-
-//             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-//               {formData.image ? (
-//                 <Image
-//                   source={{ uri: formData.image }}
-//                   style={styles.previewImage}
-//                 />
-//               ) : (
-//                 <Text style={styles.imageText}>Upload Product Image</Text>
-//               )}
-//             </TouchableOpacity>
-
-//             <TextInput
-//               style={styles.input}
-//               placeholder="Product Name"
-//               value={formData.name}
-//               onChangeText={(t) =>
-//                 setFormData((s) => ({ ...s, name: t }))
-//               }
-//             />
-
-//             <View style={styles.pickerWrapper}>
-//               <Picker
-//                 selectedValue={formData.category}
-//                 onValueChange={(v) =>
-//                   setFormData((s) => ({ ...s, category: v }))
-//                 }>
-//                 {CATEGORIES.map((c) => (
-//                   <Picker.Item key={c} label={c} value={c} />
-//                 ))}
-//               </Picker>
-//             </View>
-
-//             <TextInput
-//               style={styles.input}
-//               placeholder="Price"
-//               keyboardType="numeric"
-//               value={formData.price}
-//               onChangeText={(t) =>
-//                 setFormData((s) => ({ ...s, price: t }))
-//               }
-//             />
-
-//             <TextInput
-//               style={styles.input}
-//               placeholder="Stock"
-//               keyboardType="numeric"
-//               value={formData.stock}
-//               onChangeText={(t) =>
-//                 setFormData((s) => ({ ...s, stock: t }))
-//               }
-//             />
-
-//             <View style={styles.modalActions}>
-//               <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-//                 <Text style={styles.btnText}>Save</Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 style={styles.cancelBtn}
-//                 onPress={() => setModalVisible(false)}>
-//                 <Text style={styles.btnText}>Cancel</Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-//     </View>
-//   );
-// }
-
-// // Styles
-// const styles = StyleSheet.create({
-//   container: { flex: 1, padding: 16, backgroundColor: '#F8F9FA' },
-//   title: { fontSize: 22, fontWeight: 'bold', color: '#2E8BC0', marginBottom: 12 },
-
-//   searchInput: {
-//     backgroundColor: '#FFF',
-//     padding: 10,
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     marginBottom: 10,
-//   },
-
-//   addButton: {
-//     backgroundColor: '#2E8BC0',
-//     padding: 12,
-//     borderRadius: 10,
-//     alignItems: 'center',
-//     marginBottom: 12,
-//   },
-//   addButtonText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-
-//   card: {
-//     backgroundColor: '#FFF',
-//     borderRadius: 12,
-//     padding: 12,
-//     flexDirection: 'row',
-//     marginBottom: 12,
-//     elevation: 2,
-//   },
-
-//   productImage: { width: 60, height: 60, borderRadius: 8, marginRight: 10 },
-
-//   productName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-//   categoryBadge: {
-//     backgroundColor: '#E3F2FD',
-//     color: '#2E8BC0',
-//     alignSelf: 'flex-start',
-//     paddingHorizontal: 8,
-//     borderRadius: 6,
-//     marginVertical: 4,
-//     fontSize: 12,
-//   },
-//   info: { fontSize: 13, color: '#555' },
-
-//   actions: { justifyContent: 'space-between' },
-//   editButton: {
-//     backgroundColor: '#81C784',
-//     padding: 6,
-//     borderRadius: 6,
-//   },
-//   deleteButton: {
-//     backgroundColor: '#E57373',
-//     padding: 6,
-//     borderRadius: 6,
-//   },
-//   actionText: { color: '#FFF', fontWeight: 'bold' },
-
-//   modalOverlay: {
-//     flex: 1,
-//     backgroundColor: 'rgba(0,0,0,0.4)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   modal: {
-//     backgroundColor: '#FFF',
-//     width: '88%',
-//     borderRadius: 14,
-//     padding: 16,
-//   },
-//   modalTitle: {
-//     fontSize: 20,
-//     fontWeight: 'bold',
-//     color: '#2E8BC0',
-//     marginBottom: 12,
-//     textAlign: 'center',
-//   },
-
-//   imagePicker: {
-//     height: 120,
-//     borderRadius: 10,
-//     borderWidth: 1,
-//     borderColor: '#CCC',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginBottom: 10,
-//   },
-//   previewImage: { width: '100%', height: '100%', borderRadius: 10 },
-//   imageText: { color: '#888' },
-
-//   input: {
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     borderRadius: 10,
-//     padding: 10,
-//     marginBottom: 10,
-//   },
-
-//   pickerWrapper: {
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     borderRadius: 10,
-//     marginBottom: 10,
-//     overflow: 'hidden',
-//   },
-
-//   modalActions: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//   },
-//   saveBtn: {
-//     backgroundColor: '#2E8BC0',
-//     padding: 10,
-//     borderRadius: 10,
-//     width: '48%',
-//     alignItems: 'center',
-//   },
-//   cancelBtn: {
-//     backgroundColor: '#999',
-//     padding: 10,
-//     borderRadius: 10,
-//     width: '48%',
-//     alignItems: 'center',
-//   },
-//   btnText: { color: '#FFF', fontWeight: 'bold' },
-// });
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -779,14 +13,17 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
 // Types
 type Product = {
-  id: string;
+  id: number;
   name: string;
   category: string;
   price: number;
   stock: number;
   image?: string;
+  description?: string;
 };
 
 type FormData = {
@@ -795,35 +32,15 @@ type FormData = {
   price: string;
   stock: string;
   image?: string;
+  description?: string;
 };
 
 const CATEGORIES = ['Vitamins', 'Hair Care', 'Pain Relief', 'Cold & Flu'];
 
 export default function AdminProducts() {
-  // ✅ Dummy data kept
-  const [products, setProducts] = useState<Product[]>([
-    {
-      id: '1',
-      name: 'Paracetamol',
-      category: 'Pain Relief',
-      price: 25,
-      stock: 50,
-    },
-    {
-      id: '2',
-      name: 'Vitamin C',
-      category: 'Vitamins',
-      price: 40,
-      stock: 100,
-    },
-    {
-      id: '3',
-      name: 'Hair Serum',
-      category: 'Hair Care',
-      price: 90,
-      stock: 30,
-    },
-  ]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [search, setSearch] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -835,8 +52,28 @@ export default function AdminProducts() {
     category: CATEGORIES[0],
     price: '',
     stock: '',
+    description: '',
   });
 
+  // Fetch products on mount
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/medicines/`);
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+      Alert.alert('Error', 'Failed to fetch products');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Open modal to add or edit product
   const openModal = (product: Product | null = null) => {
     if (product) {
       setEditingProduct(product);
@@ -846,71 +83,110 @@ export default function AdminProducts() {
         price: product.price.toString(),
         stock: product.stock.toString(),
         image: product.image,
+        description: product.description || '',
       });
     } else {
       setEditingProduct(null);
-      setFormData({
-        name: '',
-        category: CATEGORIES[0],
-        price: '',
-        stock: '',
-      });
+      setFormData({ name: '', category: CATEGORIES[0], price: '', stock: '', description: '' });
     }
     setModalVisible(true);
   };
 
+  // Pick image from gallery
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission required');
+      Alert.alert('Permission required', 'You need to allow media access.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       quality: 0.7,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
     });
 
-    if (!result.canceled) {
-      setFormData((p) => ({ ...p, image: result.assets[0].uri }));
+    if (!result.canceled && result.assets[0].uri) {
+      setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
     }
   };
 
-  const handleSave = () => {
+  // Save or update product
+  const handleSave = async () => {
     if (!formData.name || !formData.price || !formData.stock) {
-      Alert.alert('Fill all fields');
+      Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
-    if (editingProduct) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                name: formData.name,
-                category: formData.category,
-                price: parseFloat(formData.price),
-                stock: parseInt(formData.stock, 10),
-                image: formData.image,
-              }
-            : p
-        )
-      );
-    } else {
-      setProducts((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          name: formData.name,
-          category: formData.category,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock, 10),
-          image: formData.image,
-        },
-      ]);
-    }
+    setIsSaving(true);
 
-    setModalVisible(false);
+    try {
+      const productData = {
+        name: formData.name,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock, 10),
+        description: formData.description || '',
+        is_available: true,
+      };
+
+      let response;
+      if (editingProduct) {
+        // Update existing product
+        response = await fetch(`${API_BASE_URL}/api/medicines/${editingProduct.id}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+      } else {
+        // Create new product
+        response = await fetch(`${API_BASE_URL}/api/medicines/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to save product');
+      }
+
+      Alert.alert('Success', editingProduct ? 'Product updated!' : 'Product added!');
+      setModalVisible(false);
+      fetchProducts(); // Refresh list
+    } catch (error) {
+      console.error('Save error:', error);
+      Alert.alert('Error', 'Failed to save product');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete product
+  const handleDelete = async (productId: number) => {
+    Alert.alert(
+      'Delete Product',
+      'Are you sure you want to delete this product?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(`${API_BASE_URL}/api/medicines/${productId}/`, {
+                method: 'DELETE',
+              });
+              if (response.ok) {
+                Alert.alert('Success', 'Product deleted');
+                fetchProducts();
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete product');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const filteredProducts = products.filter(
@@ -918,6 +194,15 @@ export default function AdminProducts() {
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#2E8BC0" />
+        <Text style={{ marginTop: 10, color: '#6B7280' }}>Loading products...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -936,7 +221,7 @@ export default function AdminProducts() {
 
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
             {item.image && (
@@ -948,14 +233,25 @@ export default function AdminProducts() {
               <Text>Price: {item.price} EGP</Text>
               <Text>Stock: {item.stock}</Text>
             </View>
-
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={() => openModal(item)}>
-              <Text style={styles.actionText}>Edit</Text>
-            </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => openModal(item)}
+              >
+                <Text style={styles.actionText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDelete(item.id)}
+              >
+                <Text style={styles.actionText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No products found. Add your first product!</Text>
+        }
       />
 
       {/* Product Modal */}
@@ -968,12 +264,9 @@ export default function AdminProducts() {
 
             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
               {formData.image ? (
-                <Image
-                  source={{ uri: formData.image }}
-                  style={styles.previewImage}
-                />
+                <Image source={{ uri: formData.image }} style={styles.previewImage} />
               ) : (
-                <Text style={styles.imageText}>Upload Image</Text>
+                <Text style={styles.imageText}>📷 Upload Image</Text>
               )}
             </TouchableOpacity>
 
@@ -981,58 +274,87 @@ export default function AdminProducts() {
               style={styles.input}
               placeholder="Product Name"
               value={formData.name}
-              onChangeText={(t) =>
-                setFormData((p) => ({ ...p, name: t }))
-              }
+              onChangeText={(t) => setFormData((p) => ({ ...p, name: t }))}
             />
 
-            {/* ✅ Modern Dropdown */}
             <TouchableOpacity
               style={styles.dropdown}
-              onPress={() => setCategoryModal(true)}>
-              <Text style={styles.dropdownText}>{formData.category}</Text>
+              onPress={() => setCategoryModal(true)}
+            >
+              <Text style={styles.dropdownText}>Category: {formData.category}</Text>
             </TouchableOpacity>
 
             <TextInput
               style={styles.input}
-              placeholder="Price"
+              placeholder="Price (EGP)"
               keyboardType="numeric"
               value={formData.price}
-              onChangeText={(t) =>
-                setFormData((p) => ({ ...p, price: t }))
-              }
+              onChangeText={(t) => setFormData((p) => ({ ...p, price: t }))}
             />
 
             <TextInput
               style={styles.input}
-              placeholder="Stock"
+              placeholder="Stock Count"
               keyboardType="numeric"
               value={formData.stock}
-              onChangeText={(t) =>
-                setFormData((p) => ({ ...p, stock: t }))
-              }
+              onChangeText={(t) => setFormData((p) => ({ ...p, stock: t }))}
             />
 
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-              <Text style={styles.btnText}>Save</Text>
-            </TouchableOpacity>
+            <TextInput
+              style={[styles.input, { height: 60 }]}
+              placeholder="Description (optional)"
+              multiline
+              value={formData.description}
+              onChangeText={(t) => setFormData((p) => ({ ...p, description: t }))}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.saveBtn, isSaving && styles.btnDisabled]}
+                onPress={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.btnText}>Save</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
 
-      {/* Category Selector */}
-      <Modal visible={categoryModal} transparent>
+      {/* Category Modal */}
+      <Modal visible={categoryModal} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.categoryModal}>
+            <Text style={styles.categoryTitle}>Select Category</Text>
             {CATEGORIES.map((cat) => (
               <TouchableOpacity
                 key={cat}
-                style={styles.categoryItem}
+                style={[
+                  styles.categoryItem,
+                  formData.category === cat && styles.categorySelected,
+                ]}
                 onPress={() => {
                   setFormData((p) => ({ ...p, category: cat }));
                   setCategoryModal(false);
-                }}>
-                <Text style={styles.categoryText}>{cat}</Text>
+                }}
+              >
+                <Text style={[
+                  styles.categoryText,
+                  formData.category === cat && styles.categoryTextSelected,
+                ]}>
+                  {cat}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -1044,114 +366,128 @@ export default function AdminProducts() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#F7F8FA' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  centered: { justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, color: '#1F2937' },
 
   searchInput: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     marginBottom: 10,
+    fontSize: 15,
   },
 
   addButton: {
     backgroundColor: '#2E8BC0',
-    padding: 12,
-    borderRadius: 10,
+    padding: 14,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  addButtonText: { color: '#fff', fontWeight: 'bold' },
+  addButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 
   card: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
-  productImage: { width: 60, height: 60, borderRadius: 8, marginRight: 10 },
-  productName: { fontWeight: 'bold', fontSize: 16 },
+  productImage: { width: 60, height: 60, borderRadius: 10, marginRight: 12 },
+  productName: { fontWeight: 'bold', fontSize: 16, color: '#1F2937' },
   categoryBadge: {
     backgroundColor: '#E3F2FD',
     paddingHorizontal: 8,
+    paddingVertical: 2,
     borderRadius: 6,
     fontSize: 12,
+    color: '#2E8BC0',
     alignSelf: 'flex-start',
     marginVertical: 4,
   },
 
-  editButton: {
-    backgroundColor: '#81C784',
-    padding: 8,
-    borderRadius: 6,
-  },
-  actionText: { color: '#fff', fontWeight: 'bold' },
+  actionButtons: { gap: 6 },
+  editButton: { backgroundColor: '#4CAF50', padding: 8, borderRadius: 8 },
+  deleteButton: { backgroundColor: '#E57373', padding: 8, borderRadius: 8 },
+  actionText: { color: '#fff', fontWeight: 'bold', fontSize: 12 },
+
+  emptyText: { textAlign: 'center', color: '#6B7280', marginTop: 40, fontSize: 15 },
 
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modal: {
-    backgroundColor: '#fff',
-    width: '88%',
-    borderRadius: 14,
-    padding: 16,
-  },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modal: { backgroundColor: '#fff', width: '90%', borderRadius: 16, padding: 20 },
+  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, color: '#1F2937' },
 
   imagePicker: {
     height: 120,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
+    backgroundColor: '#F9FAFB',
   },
   previewImage: { width: '100%', height: '100%', borderRadius: 10 },
-  imageText: { color: '#888' },
+  imageText: { color: '#6B7280', fontSize: 16 },
 
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E5E7EB',
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 15,
+    backgroundColor: '#fff',
   },
 
   dropdown: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#E5E7EB',
     borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
-    backgroundColor: '#fff',
+    padding: 14,
+    marginBottom: 12,
+    backgroundColor: '#F9FAFB',
   },
-  dropdownText: { color: '#333' },
+  dropdownText: { color: '#1F2937', fontSize: 15 },
 
+  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  cancelBtn: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  cancelText: { color: '#6B7280', fontWeight: 'bold' },
   saveBtn: {
-    backgroundColor: '#2E8BC0',
-    padding: 12,
+    flex: 1,
+    backgroundColor: '#4CAF50',
+    padding: 14,
     borderRadius: 10,
     alignItems: 'center',
   },
-  btnText: { color: '#fff', fontWeight: 'bold' },
+  btnDisabled: { opacity: 0.7 },
+  btnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 
-  categoryModal: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    width: '80%',
-  },
-  categoryItem: {
-    padding: 14,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-  categoryText: { fontSize: 16 },
+  categoryModal: { backgroundColor: '#fff', borderRadius: 14, width: '80%', padding: 8 },
+  categoryTitle: { fontSize: 18, fontWeight: 'bold', padding: 14, color: '#1F2937' },
+  categoryItem: { padding: 16, borderBottomWidth: 1, borderColor: '#F3F4F6' },
+  categorySelected: { backgroundColor: '#E3F2FD' },
+  categoryText: { fontSize: 16, color: '#1F2937' },
+  categoryTextSelected: { color: '#2E8BC0', fontWeight: 'bold' },
 });

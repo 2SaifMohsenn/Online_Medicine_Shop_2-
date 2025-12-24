@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Medicine, Order, OrderItem, User, Admin, ShippingAddress
+from .models import Medicine, Order, OrderItem, User, Admin
 
 # -------------------
 # Medicine Admin
@@ -45,10 +45,4 @@ class AdminAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email')
     search_fields = ('first_name', 'last_name', 'email')
 
-# -------------------
-# ShippingAddress Admin
-# -------------------
-@admin.register(ShippingAddress)
-class ShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ('street_address', 'city', 'state', 'zip_code')
-    search_fields = ('street_address', 'city', 'state', 'zip_code')
+

@@ -1,212 +1,8 @@
-// // Profile.tsx
-// import { useRouter } from 'expo-router';
-// import React, { useState } from 'react';
-// import { Button, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// export default function Profile() {
-//   const router = useRouter();
-
-//   const [editModalVisible, setEditModalVisible] = useState(false);
-//   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-
-//   const [name, setName] = useState('Jessica Miller');
-//   const [email, setEmail] = useState('jessica.miller@example.com');
-//   const [phone, setPhone] = useState('(555) 123-4567');
-//   const [address, setAddress] = useState('123 Wellness Ave, Suite 4B, Healthville, ST 54321');
-
-//   const [currentPassword, setCurrentPassword] = useState('');
-//   const [newPassword, setNewPassword] = useState('');
-//   const [confirmPassword, setConfirmPassword] = useState('');
-
-//   const handleLogout = () => {
-//     router.replace('/');
-//   };
-
-//   const handleSaveProfile = () => {
-//     // Save profile changes logic here
-//     setEditModalVisible(false);
-//   };
-
-//   const handleChangePassword = () => {
-//     if (newPassword !== confirmPassword) {
-//       alert("New passwords do not match!");
-//       return;
-//     }
-//     // Call API to change password
-//     setPasswordModalVisible(false);
-//     setCurrentPassword('');
-//     setNewPassword('');
-//     setConfirmPassword('');
-//   };
-
-//   return (
-//     <ScrollView style={styles.container}>
-//       <Text style={styles.title}>My Profile</Text>
-
-//       <View style={styles.profileCard}>
-//         {/* User Info */}
-//         <View style={styles.userInfo}>
-//           <View style={styles.userText}>
-//             <Text style={styles.userName}>{name}</Text>
-//             <Text style={styles.userEmail}>{email}</Text>
-//           </View>
-//         </View>
-
-//         {/* Personal Information */}
-//         <View style={styles.personalInfo}>
-//           <Text style={styles.sectionTitle}>Personal Information</Text>
-//           <View style={styles.infoRow}>
-//             <Text style={styles.infoLabel}>Shipping Address</Text>
-//             <Text style={styles.infoValue}>{address}</Text>
-//           </View>
-//           <View style={styles.infoRow}>
-//             <Text style={styles.infoLabel}>Phone Number</Text>
-//             <Text style={styles.infoValue}>{phone}</Text>
-//           </View>
-//           <View style={styles.infoRow}>
-//             <Text style={styles.infoLabel}>Email Address</Text>
-//             <Text style={styles.infoValue}>{email}</Text>
-//           </View>
-//         </View>
-
-//         {/* Account Actions */}
-//         <View style={styles.actionsRow}>
-//           <TouchableOpacity onPress={handleLogout}>
-//             <Text style={styles.logoutText}>Logout</Text>
-//           </TouchableOpacity>
-
-//           <View style={styles.rightButtons}>
-//             <TouchableOpacity style={styles.editButton} onPress={() => setEditModalVisible(true)}>
-//               <Text style={styles.editButtonText}>Edit Profile</Text>
-//             </TouchableOpacity>
-//             <TouchableOpacity style={styles.changePassButton} onPress={() => setPasswordModalVisible(true)}>
-//               <Text style={styles.changePassText}>Change Password</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-//       </View>
-
-//       {/* Edit Profile Modal */}
-//       <Modal
-//         animationType="slide"
-//         transparent={true}
-//         visible={editModalVisible}
-//         onRequestClose={() => setEditModalVisible(false)}
-//       >
-//         <View style={styles.modalOverlay}>
-//           <View style={styles.modalContainer}>
-//             <Text style={styles.modalTitle}>Edit Profile</Text>
-
-//             <TextInput
-//               style={styles.input}
-//               value={name}
-//               onChangeText={setName}
-//               placeholder="Name"
-//             />
-//             <TextInput
-//               style={styles.input}
-//               value={email}
-//               onChangeText={setEmail}
-//               placeholder="Email"
-//             />
-//             <TextInput
-//               style={styles.input}
-//               value={phone}
-//               onChangeText={setPhone}
-//               placeholder="Phone Number"
-//             />
-//             <TextInput
-//               style={styles.input}
-//               value={address}
-//               onChangeText={setAddress}
-//               placeholder="Shipping Address"
-//             />
-
-//             <View style={styles.modalButtons}>
-//               <Button title="Cancel" color="#da0505" onPress={() => setEditModalVisible(false)} />
-//               <Button title="Save" onPress={handleSaveProfile} />
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-
-//       {/* Change Password Modal */}
-//       <Modal
-//         animationType="slide"
-//         transparent={true}
-//         visible={passwordModalVisible}
-//         onRequestClose={() => setPasswordModalVisible(false)}
-//       >
-//         <View style={styles.modalOverlay}>
-//           <View style={styles.modalContainer}>
-//             <Text style={styles.modalTitle}>Change Password</Text>
-
-//             <TextInput
-//               style={styles.input}
-//               value={currentPassword}
-//               onChangeText={setCurrentPassword}
-//               placeholder="Current Password"
-//               secureTextEntry
-//             />
-//             <TextInput
-//               style={styles.input}
-//               value={newPassword}
-//               onChangeText={setNewPassword}
-//               placeholder="New Password"
-//               secureTextEntry
-//             />
-//             <TextInput
-//               style={styles.input}
-//               value={confirmPassword}
-//               onChangeText={setConfirmPassword}
-//               placeholder="Confirm New Password"
-//               secureTextEntry
-//             />
-
-//             <View style={styles.modalButtons}>
-//               <Button title="Cancel" color="#da0505" onPress={() => setPasswordModalVisible(false)} />
-//               <Button title="Save" onPress={handleChangePassword} />
-//             </View>
-//           </View>
-//         </View>
-//       </Modal>
-//     </ScrollView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: '#F8F9FA', padding: 16 },
-//   title: { fontSize: 28, fontWeight: 'bold', marginBottom: 20, color: '#333333' },
-//   profileCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 5 },
-//   userInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-//   userText: { flex: 1 },
-//   userName: { fontSize: 18, fontWeight: 'bold', color: '#333333' },
-//   userEmail: { fontSize: 14, color: '#666666', marginTop: 2 },
-//   personalInfo: { borderTopWidth: 1, borderTopColor: '#E0E0E0', paddingTop: 15 },
-//   sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, color: '#333333' },
-//   infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-//   infoLabel: { fontSize: 14, color: '#666666' },
-//   infoValue: { fontSize: 14, fontWeight: '500', flex: 1, textAlign: 'right', color: '#333333' },
-//   actionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 },
-//   rightButtons: { flexDirection: 'row', gap: 10 },
-//   editButton: { backgroundColor: '#2E8BC0', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
-//   editButtonText: { color: '#fff', fontWeight: 'bold' },
-//   changePassButton: { backgroundColor: '#A1D9A6', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8 },
-//   changePassText: { color: '#fff', fontWeight: 'bold' },
-//   logoutText: { color: '#da0505ff', fontWeight: 'bold', fontSize: 16 },
-
-//   // Modal styles
-//   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-//   modalContainer: { width: '90%', backgroundColor: '#fff', borderRadius: 12, padding: 20 },
-//   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, color: '#333333' },
-//   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 10 },
-//   modalButtons: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-// });
-
-
-
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -214,105 +10,184 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { getUser, saveUser } from '@/constants/userStorage';
+import { updateUserProfile, changePassword } from '@/constants/api';
 
 export default function UserProfile() {
-  // Temporary user data (replace later with API)
-  const user = {
-    firstName: 'Ahmed',
-    lastName: 'Hassan',
-    email: 'ahmed@gmail.com',
-    phone: '+20 101 234 5678',
-    address: '12 Tahrir Street',
-    city: 'Cairo',
-    state: 'Cairo',
-    zipCode: '11511',
+  const storedUser = getUser();
+
+  // Editable fields state
+  const [firstName, setFirstName] = useState(storedUser?.first_name || 'User');
+  const [lastName, setLastName] = useState(storedUser?.last_name || 'Account');
+  const [address, setAddress] = useState(storedUser?.shipping_address || '');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Password fields state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const email = storedUser?.email || 'user@example.com';
+
+  const handleSaveProfile = async () => {
+    if (!storedUser?.id) {
+      Alert.alert('Error', 'Please login first');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await updateUserProfile({
+        user_id: storedUser.id,
+        first_name: firstName,
+        last_name: lastName,
+        shipping_address: address,
+      });
+
+      // Update local storage
+      if (response.user) {
+        saveUser({
+          ...response.user,
+          role: 'user',
+        });
+      }
+
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Update failed';
+      Alert.alert('Error', message);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!storedUser?.id) {
+      Alert.alert('Error', 'Please login first');
+      return;
+    }
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all password fields');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 3) {
+      Alert.alert('Error', 'Password must be at least 3 characters');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await changePassword({
+        user_id: storedUser.id,
+        role: 'user',
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+
+      // Clear password fields
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      Alert.alert('Success', 'Password changed successfully!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Password change failed';
+      Alert.alert('Error', message);
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Profile Header */}
+      {/* ================= Profile Header ================= */}
       <View style={styles.profileHeader}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {user.firstName.charAt(0)}
-            {user.lastName.charAt(0)}
+            {firstName.charAt(0)}
+            {lastName.charAt(0)}
           </Text>
         </View>
 
         <Text style={styles.name}>
-          {user.firstName} {user.lastName}
+          {firstName} {lastName}
         </Text>
-        <Text style={styles.email}>{user.email}</Text>
+        <Text style={styles.email}>{email}</Text>
       </View>
 
-      {/* Account Info */}
+      {/* ================= Account Info ================= */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Account Information</Text>
 
         <View style={styles.field}>
           <Text style={styles.label}>First Name</Text>
-          <TextInput value={user.firstName} editable={false} style={styles.inputDisabled} />
+          <TextInput
+            value={firstName}
+            onChangeText={setFirstName}
+            style={styles.input}
+            placeholder="Enter first name"
+          />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Last Name</Text>
-          <TextInput value={user.lastName} editable={false} style={styles.inputDisabled} />
+          <TextInput
+            value={lastName}
+            onChangeText={setLastName}
+            style={styles.input}
+            placeholder="Enter last name"
+          />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Email</Text>
-          <TextInput value={user.email} editable={false} style={styles.inputDisabled} />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Phone</Text>
-          <TextInput value={user.phone} editable={false} style={styles.inputDisabled} />
-        </View>
-      </View>
-
-      {/* Shipping Address */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Shipping Address</Text>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Street Address</Text>
           <TextInput
-            value={user.address}
-            placeholder="Street address"
+            value={email}
+            editable={false}
+            style={styles.inputDisabled}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Address</Text>
+          <TextInput
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Enter your address"
             style={styles.input}
           />
         </View>
 
-        <View style={styles.row}>
-          <View style={[styles.field, { flex: 1, marginRight: 8 }]}>
-            <Text style={styles.label}>City</Text>
-            <TextInput value={user.city} placeholder="City" style={styles.input} />
-          </View>
-
-          <View style={[styles.field, { flex: 1, marginLeft: 8 }]}>
-            <Text style={styles.label}>State</Text>
-            <TextInput value={user.state} placeholder="State" style={styles.input} />
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>ZIP Code</Text>
-          <TextInput
-            value={user.zipCode}
-            placeholder="ZIP Code"
-            keyboardType="numeric"
-            style={styles.input}
-          />
-        </View>
+        <TouchableOpacity
+          style={[styles.saveButton, isUpdating && styles.buttonDisabled]}
+          onPress={handleSaveProfile}
+          disabled={isUpdating}
+        >
+          {isUpdating ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
+        </TouchableOpacity>
       </View>
 
-      {/* Change Password */}
+      {/* ================= Change Password ================= */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Change Password</Text>
 
         <View style={styles.field}>
           <Text style={styles.label}>Current Password</Text>
           <TextInput
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
             placeholder="Enter current password"
             secureTextEntry
             style={styles.input}
@@ -322,6 +197,8 @@ export default function UserProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>New Password</Text>
           <TextInput
+            value={newPassword}
+            onChangeText={setNewPassword}
             placeholder="Enter new password"
             secureTextEntry
             style={styles.input}
@@ -331,20 +208,31 @@ export default function UserProfile() {
         <View style={styles.field}>
           <Text style={styles.label}>Confirm New Password</Text>
           <TextInput
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             placeholder="Confirm new password"
             secureTextEntry
             style={styles.input}
           />
         </View>
 
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, isChangingPassword && styles.buttonDisabled]}
+          onPress={handleChangePassword}
+          disabled={isChangingPassword}
+        >
+          {isChangingPassword ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Update Password</Text>
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
 
+/* ================= Styles ================= */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -410,9 +298,6 @@ const styles = StyleSheet.create({
   field: {
     marginBottom: 14,
   },
-  row: {
-    flexDirection: 'row',
-  },
   label: {
     fontSize: 13,
     color: '#6B7280',
@@ -426,6 +311,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    color: '#1F2937',
   },
   inputDisabled: {
     backgroundColor: '#F1F5F9',
@@ -440,11 +326,14 @@ const styles = StyleSheet.create({
 
   /* Button */
   saveButton: {
-    backgroundColor: '#2E8BC0',
+    backgroundColor: '#4CAF50',
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
     marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   saveButtonText: {
     color: '#FFFFFF',
