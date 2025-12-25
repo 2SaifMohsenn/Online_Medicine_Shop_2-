@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   ScrollView,
@@ -8,10 +8,24 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { getUser } from '@/constants/userStorage';
+import { getCart, saveCart } from '@/constants/cartStorage';
+import { API_BASE_URL } from '@/constants/api';
 
 const logoImage = require('@/assets/images/logo.png');
+
+interface Medicine {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  price: string;
+  stock: number;
+  is_available: boolean;
+  image: string | null;
+}
 
 const bestSellers = [
   {
@@ -49,6 +63,69 @@ export default function HomePage() {
   const user = getUser();
   const userName = user ? `${user.first_name} ${user.last_name}` : 'Guest';
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch medicines from API
+  useEffect(() => {
+    fetchMedicines();
+  }, []);
+
+  // Define the valid categories for search
+  const VALID_CATEGORIES = ['Vitamins', 'Pain Relief', 'Hair Care', 'Cold & Flu'];
+
+  const fetchMedicines = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/medicines/`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      // Filter to include only medicines from the four main categories
+      const filteredData = data.filter((medicine: Medicine) =>
+        VALID_CATEGORIES.includes(medicine.category)
+      );
+      console.log(`Fetched ${filteredData.length} medicines from ${VALID_CATEGORIES.length} categories`);
+      setMedicines(filteredData);
+    } catch (error) {
+      console.error('Error fetching medicines:', error);
+      // Show alert to help debug connection issues
+      alert('Could not load medicines. Please check if the backend server is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter medicines based on search query
+  const filteredMedicines = medicines.filter((medicine) =>
+    medicine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    medicine.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    medicine.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Add to cart function
+  const addToCart = (medicine: Medicine) => {
+    const cart = getCart();
+    const existingItem = cart.find((item: any) => item.id === medicine.id);
+
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({
+        id: medicine.id,
+        name: medicine.name,
+        price: parseFloat(medicine.price),
+        quantity: 1,
+        image: medicine.image,
+      });
+    }
+
+    saveCart(cart);
+    alert(`${medicine.name} added to cart!`);
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
@@ -83,8 +160,42 @@ export default function HomePage() {
           style={styles.searchInput}
           placeholder="Search medicines, vitamins..."
           placeholderTextColor="#9CA3AF"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
+
+      {/* Search Results - Only show when there's a search query */}
+      {searchQuery.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>
+            Search Results ({filteredMedicines.length})
+          </Text>
+          {loading ? (
+            <ActivityIndicator size="large" color="#2E8BC0" style={{ marginVertical: 20 }} />
+          ) : filteredMedicines.length > 0 ? (
+            <View style={styles.searchResults}>
+              {filteredMedicines.map((medicine) => (
+                <View key={medicine.id} style={styles.searchResultCard}>
+                  <View style={styles.searchResultInfo}>
+                    <Text style={styles.searchResultName}>{medicine.name}</Text>
+                    <Text style={styles.searchResultCategory}>{medicine.category}</Text>
+                    <Text style={styles.searchResultPrice}>{medicine.price} EGP</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => addToCart(medicine)}
+                  >
+                    <Text style={styles.addButtonText}>＋</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noResults}>No medicines found matching "{searchQuery}"</Text>
+          )}
+        </>
+      )}
 
       {/* Categories */}
       <Text style={styles.sectionTitle}>Categories</Text>
@@ -286,6 +397,51 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 20,
     fontWeight: 'bold',
+  },
+
+  /* Search Results */
+  searchResults: {
+    marginBottom: 20,
+  },
+  searchResultCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  searchResultInfo: {
+    flex: 1,
+  },
+  searchResultName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 4,
+  },
+  searchResultCategory: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  searchResultPrice: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#2E8BC0',
+  },
+  noResults: {
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#6B7280',
+    marginVertical: 20,
+    fontStyle: 'italic',
   },
 });
 

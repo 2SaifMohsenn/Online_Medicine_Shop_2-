@@ -8,9 +8,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
-
-const API_BASE_URL = 'http://127.0.0.1:8000';
+import { API_BASE_URL } from '@/constants/api';
+import { addToCart, CartItem } from '@/constants/cartStorage';
 
 interface Product {
   id: number;
@@ -49,6 +50,18 @@ export default function HairCarePage() {
     }
   };
 
+  const handleAddToCart = (product: Product) => {
+    const cartItem: CartItem = {
+      id: product.id,
+      name: product.name,
+      price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+      quantity: 1,
+      image: product.image || null,
+    };
+    addToCart(cartItem);
+    Alert.alert('Added to Cart', `${product.name} has been added to your cart!`);
+  };
+
   if (isLoading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -79,7 +92,11 @@ export default function HairCarePage() {
                   {item.stock > 0 ? `${item.stock} in stock` : 'Out of stock'}
                 </Text>
               </View>
-              <TouchableOpacity style={[styles.button, item.stock === 0 && styles.buttonDisabled]} disabled={item.stock === 0}>
+              <TouchableOpacity
+                style={[styles.button, item.stock === 0 && styles.buttonDisabled]}
+                disabled={item.stock === 0}
+                onPress={() => handleAddToCart(item)}
+              >
                 <Text style={styles.buttonText}>Add to Cart</Text>
               </TouchableOpacity>
             </Animated.View>
