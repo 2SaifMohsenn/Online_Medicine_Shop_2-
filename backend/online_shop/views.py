@@ -351,3 +351,85 @@ def get_dashboard_stats(request):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+from django.db import transaction
+
+@api_view(['POST'])
+def create_order(request):
+    """
+    Create a new order with items and update stock.
+    Expects: user_id, items (array of {medicine_id, quantity, price}), total_price
+    """
+    print(f"--- Received Create Order Request ---")
+    print(f"Data: {request.data}")
+    
+    try:
+        data = request.data
+        user_id = data.get('user_id')
+        items = data.get('items', [])
+        total_price = data.get('total_price', 0)
+
+        # Validate required fields
+        if not user_id:
+            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not items or len(items) == 0:
+            return Response({'error': 'Order must contain at least one item'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get user
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        with transaction.atomic():
+            # 1. Validation Phase: Check stock for all items first
+            medicines_to_update = []
+            for item in items:
+                medicine_id = item.get('medicine_id')
+                qty_ordered = item.get('quantity', 1)
+                
+                try:
+                    medicine = Medicine.objects.select_for_update().get(id=medicine_id)
+                    if medicine.stock < qty_ordered:
+                        return Response({
+                            'error': f'Insufficient stock for {medicine.name}. Available: {medicine.stock}, Ordered: {qty_ordered}'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                    
+                    medicines_to_update.append((medicine, qty_ordered))
+                except Medicine.DoesNotExist:
+                    return Response({'error': f'Medicine with ID {medicine_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # 2. Execution Phase: Create Order and Items, and Update Stock
+            order = Order.objects.create(
+                user=user,
+                total_price=total_price,
+                is_paid=True
+            )
+
+            for medicine, qty in medicines_to_update:
+                # Create Order Item
+                OrderItem.objects.create(
+                    order=order,
+                    medicine=medicine,
+                    quantity=qty,
+                    price=medicine.price * qty # Use current medicine price
+                )
+                
+                # Reduce Stock
+                medicine.stock -= qty
+                medicine.save()
+
+            return Response({
+                'message': 'Order created successfully and stock updated',
+                'order_id': order.id,
+                'total_price': float(order.total_price)
+            }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        print(f"Error creating order: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

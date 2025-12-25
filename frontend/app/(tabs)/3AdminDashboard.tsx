@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { getUser } from '@/constants/userStorage';
 import { getDashboardStats } from '@/constants/api';
 
@@ -22,10 +23,12 @@ export default function AdminDashboard() {
   const [lowStockMedicines, setLowStockMedicines] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch stats on mount
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  // Fetch stats when page is focused (auto-refresh on navigation)
+  useFocusEffect(
+    useCallback(() => {
+      fetchStats();
+    }, [])
+  );
 
   const fetchStats = async () => {
     try {
@@ -102,12 +105,14 @@ export default function AdminDashboard() {
                 <Text style={styles.cardValue}>{totalRevenue} EGP</Text>
               </View>
 
-              <View style={styles.statCard}>
-                <Text style={styles.cardTitle}>Low Stock</Text>
-                <Text style={[styles.cardValue, { color: lowStockMedicines > 0 ? '#E57373' : '#4CAF50' }]}>
-                  {lowStockMedicines}
-                </Text>
-              </View>
+              <Link href="/3LowStock" asChild>
+                <TouchableOpacity style={styles.statCard}>
+                  <Text style={styles.cardTitle}>Low Stock</Text>
+                  <Text style={[styles.cardValue, { color: lowStockMedicines > 0 ? '#E57373' : '#4CAF50' }]}>
+                    {lowStockMedicines}
+                  </Text>
+                </TouchableOpacity>
+              </Link>
             </View>
           </>
         )}
