@@ -7,8 +7,27 @@ export const API_BASE_URL = 'http://127.0.0.1:8000';
 // For mobile testing (uncomment and use your computer's IP)
 // export const API_BASE_URL = 'http://192.168.x.x:8000';
 
+/**
+ * Helper to handle image URLs, prepending API_BASE_URL if the path is relative.
+ */
+export const getImageUrl = (url: string | undefined): string | undefined => {
+    if (!url) return undefined;
+    if (
+        url.startsWith('http') ||
+        url.startsWith('file') ||
+        url.startsWith('content') ||
+        url.startsWith('blob:') ||
+        url.startsWith('data:')
+    ) {
+        return url;
+    }
+    // Handle relative paths from Django (e.g., /media/medicines/photo.jpg)
+    return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export interface SignupData {
-    name: string;
+    first_name: string;
+    last_name: string;
     email: string;
     password: string;
     phone?: string;

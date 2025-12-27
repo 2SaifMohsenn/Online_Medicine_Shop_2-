@@ -10,7 +10,7 @@ import {
   View,
   Alert,
 } from 'react-native';
-import { API_BASE_URL } from '@/constants/api';
+import { API_BASE_URL, getImageUrl } from '@/constants/api';
 import { addToCart, CartItem } from '@/constants/cartStorage';
 
 interface Product {
@@ -82,7 +82,7 @@ export default function PainReliefPage() {
           {products.map((item) => (
             <Animated.View key={item.id} style={[styles.card, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
               {item.image ? (
-                <Image source={{ uri: item.image }} style={styles.image} />
+                <Image source={{ uri: getImageUrl(item.image) }} style={styles.image} />
               ) : (
                 <View style={styles.imagePlaceholder}><Text style={styles.placeholderText}>💊</Text></View>
               )}
