@@ -3,17 +3,17 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   Modal,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-
-const API_BASE_URL = 'http://127.0.0.1:8000';
+import { API_BASE_URL, getImageUrl } from '@/constants/api';
 
 // Types
 type Product = {
@@ -94,19 +94,28 @@ export default function AdminProducts() {
 
   // Pick image from gallery
   const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission required', 'You need to allow media access.');
-      return;
-    }
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission required', 'You need to allow media access.');
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      quality: 0.7,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        quality: 0.7,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      });
 
-    if (!result.canceled && result.assets[0].uri) {
-      setFormData((prev) => ({ ...prev, image: result.assets[0].uri }));
+      console.log('Image picker result:', result);
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const selectedUri = result.assets[0].uri;
+        console.log('Selected image URI:', selectedUri);
+        setFormData((prev) => ({ ...prev, image: selectedUri }));
+      }
+    } catch (error) {
+      console.error('Pick image error:', error);
+      Alert.alert('Error', 'Failed to pick image');
     }
   };
 
@@ -118,76 +127,147 @@ export default function AdminProducts() {
     }
 
     setIsSaving(true);
+    console.log('--- Start Product Save ---');
+    console.log('FormData State:', { name: formData.name, category: formData.category, hasImage: !!formData.image });
 
     try {
-      const productData = {
-        name: formData.name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock, 10),
-        description: formData.description || '',
-        is_available: true,
-      };
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('category', formData.category);
+      data.append('price', formData.price);
+      data.append('stock', formData.stock);
+      data.append('description', formData.description || '');
+      data.append('is_available', 'true');
 
-      let response;
-      if (editingProduct) {
-        // Update existing product
-        response = await fetch(`${API_BASE_URL}/api/medicines/${editingProduct.id}/`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(productData),
-        });
-      } else {
-        // Create new product
-        response = await fetch(`${API_BASE_URL}/api/medicines/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(productData),
-        });
+      if (formData.image) {
+        const uri = formData.image;
+        console.log('Processing image for upload:', uri);
+
+        if (uri.startsWith('file://') || uri.startsWith('content://')) {
+          // Mobile native file
+          const uriParts = uri.split('.');
+          const extension = uriParts.length > 1 ? uriParts[uriParts.length - 1].toLowerCase() : 'jpg';
+          const type = `image/${extension === 'png' ? 'png' : extension === 'gif' ? 'gif' : 'jpeg'}`;
+
+          // @ts-ignore
+          data.append('image', {
+            uri: uri,
+            name: `upload_${Date.now()}.${extension}`,
+            type: type,
+          });
+          console.log('Native image appended to FormData');
+        } else if (uri.startsWith('blob:')) {
+          // Web blob URIs (common on Expo Web)
+          try {
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            data.append('image', blob, `upload_${Date.now()}.jpg`);
+            console.log('Blob image appended to FormData');
+          } catch (blobError) {
+            console.error('Failed to process blob URI:', blobError);
+          }
+        } else if (uri.startsWith('data:')) {
+          // Data URI (base64) - optionally handle if needed, but picker usually gives uri
+          console.log('Data URI detected - not currently handled for upload');
+        } else if (uri.startsWith('http')) {
+          // It's already a hosted URL (e.g. from the backend)
+          console.log('Existing URL detected, not re-uploading');
+        }
       }
+
+      const url = editingProduct
+        ? `${API_BASE_URL}/api/medicines/${editingProduct.id}/`
+        : `${API_BASE_URL}/api/medicines/`;
+      const method = editingProduct ? 'PUT' : 'POST';
+
+      console.log(`Sending ${method} request to ${url}`);
+
+      const response = await fetch(url, {
+        method: method,
+        body: data,
+        headers: {
+          'Accept': 'application/json',
+          // NO Content-Type header - fetch will set it with boundary for FormData
+        },
+      });
+
+      console.log('Server response status:', response.status);
 
       if (!response.ok) {
-        throw new Error('Failed to save product');
+        const contentType = response.headers.get('content-type');
+        let errorMsg = `Server error: ${response.status}`;
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          console.error('Server error JSON:', errorData);
+          errorMsg = JSON.stringify(errorData);
+        } else {
+          const text = await response.text();
+          console.error('Server error text:', text.substring(0, 200));
+        }
+        throw new Error(errorMsg);
       }
+
+      const result = await response.json();
+      console.log('Save successful:', result);
 
       Alert.alert('Success', editingProduct ? 'Product updated!' : 'Product added!');
       setModalVisible(false);
       fetchProducts(); // Refresh list
     } catch (error) {
-      console.error('Save error:', error);
-      Alert.alert('Error', 'Failed to save product');
+      console.error('Save failed:', error);
+      Alert.alert('Error', error instanceof Error ? error.message : 'An error occurred while saving');
     } finally {
       setIsSaving(false);
+      console.log('--- End Product Save ---');
     }
   };
 
   // Delete product
   const handleDelete = async (productId: number) => {
-    Alert.alert(
-      'Delete Product',
-      'Are you sure you want to delete this product?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const response = await fetch(`${API_BASE_URL}/api/medicines/${productId}/`, {
-                method: 'DELETE',
-              });
-              if (response.ok) {
-                Alert.alert('Success', 'Product deleted');
-                fetchProducts();
-              }
-            } catch (error) {
-              Alert.alert('Error', 'Failed to delete product');
-            }
-          },
-        },
-      ]
-    );
+    const performDelete = async () => {
+      try {
+        console.log(`Attempting to delete product ID: ${productId}`);
+        const response = await fetch(`${API_BASE_URL}/api/medicines/${productId}/`, {
+          method: 'DELETE',
+        });
+
+        console.log('Delete response status:', response.status);
+
+        if (response.ok || response.status === 204) {
+          Alert.alert('Success', 'Product deleted successfully');
+          fetchProducts(); // Refresh list from backend
+        } else {
+          const contentType = response.headers.get('content-type');
+          let errorMsg = `Failed to delete (Status: ${response.status})`;
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMsg = JSON.stringify(errorData);
+          }
+          throw new Error(errorMsg);
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to delete product');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      // Use window.confirm for web as Alert.alert might not show confirmation buttons correctly on all browsers
+      if (window.confirm('Are you sure you want to delete this product?')) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete Product',
+        'Are you sure you want to delete this product?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: performDelete },
+        ]
+      );
+    }
   };
+
 
   const filteredProducts = products.filter(
     (p) =>
@@ -225,7 +305,11 @@ export default function AdminProducts() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             {item.image && (
-              <Image source={{ uri: item.image }} style={styles.productImage} />
+              <Image
+                source={{ uri: getImageUrl(item.image) }}
+                style={styles.productImage}
+                contentFit="cover"
+              />
             )}
             <View style={{ flex: 1 }}>
               <Text style={styles.productName}>{item.name}</Text>
@@ -264,7 +348,11 @@ export default function AdminProducts() {
 
             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
               {formData.image ? (
-                <Image source={{ uri: formData.image }} style={styles.previewImage} />
+                <Image
+                  source={{ uri: getImageUrl(formData.image) }}
+                  style={styles.previewImage}
+                  contentFit="contain"
+                />
               ) : (
                 <Text style={styles.imageText}>📷 Upload Image</Text>
               )}
@@ -432,7 +520,8 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, color: '#1F2937' },
 
   imagePicker: {
-    height: 120,
+    width: '100%',
+    height: 180,
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#E5E7EB',
@@ -441,8 +530,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
     backgroundColor: '#F9FAFB',
+    overflow: 'hidden',
   },
-  previewImage: { width: '100%', height: '100%', borderRadius: 10 },
+  previewImage: { width: '100%', height: '100%' },
   imageText: { color: '#6B7280', fontSize: 16 },
 
   input: {

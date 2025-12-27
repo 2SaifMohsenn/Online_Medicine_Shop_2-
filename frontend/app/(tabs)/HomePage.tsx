@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { getUser } from '@/constants/userStorage';
 import { getCart, saveCart } from '@/constants/cartStorage';
-import { API_BASE_URL } from '@/constants/api';
+import { API_BASE_URL, getImageUrl } from '@/constants/api';
 
 const logoImage = require('@/assets/images/logo.png');
 
@@ -27,36 +27,7 @@ interface Medicine {
   image: string | null;
 }
 
-const bestSellers = [
-  {
-    id: '1',
-    name: 'Pain Reliever',
-    desc: '500mg, 24 Tablets',
-    price: '55 EGP',
-    img: require('@/assets/images/pain_Reliever.png'),
-  },
-  {
-    id: '2',
-    name: 'Vitamin C',
-    desc: '1000mg, 90 Capsules',
-    price: '84 EGP',
-    img: require('@/assets/images/vitamin_C.png'),
-  },
-  {
-    id: '3',
-    name: 'Cold & Flu Relief',
-    desc: 'Day & Night Combo',
-    price: '76 EGP',
-    img: require('@/assets/images/Panadol.png'),
-  },
-  {
-    id: '4',
-    name: 'Allergy Relief',
-    desc: '24-Hour, 30 Tablets',
-    price: '64 EGP',
-    img: require('@/assets/images/Allergy_Relief.png'),
-  },
-];
+// Best sellers will be dynamically populated from the API
 
 export default function HomePage() {
   const router = useRouter();
@@ -217,23 +188,34 @@ export default function HomePage() {
         ))}
       </View>
 
-      {/* Best Sellers */}
-      <Text style={styles.sectionTitle}>Best Sellers</Text>
+      <Text style={styles.sectionTitle}>Available Products</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {bestSellers.map((item) => (
+        {medicines.filter(m => m.is_available).map((item) => (
           <View key={item.id} style={styles.productCard}>
-            <Image source={item.img} style={styles.productImage} />
-            <Text style={styles.productName}>{item.name}</Text>
-            <Text style={styles.productDesc}>{item.desc}</Text>
+            {item.image ? (
+              <Image source={{ uri: getImageUrl(item.image) }} style={styles.productImage} />
+            ) : (
+              <View style={[styles.productImage, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0', borderRadius: 10 }]}>
+                <Text style={{ fontSize: 40 }}>💊</Text>
+              </View>
+            )}
+            <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.productDesc} numberOfLines={2}>{item.description || item.category}</Text>
 
             <View style={styles.productFooter}>
-              <Text style={styles.productPrice}>{item.price}</Text>
-              <TouchableOpacity style={styles.addButton}>
+              <Text style={styles.productPrice}>{item.price} EGP</Text>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => addToCart(item)}
+              >
                 <Text style={styles.addButtonText}>＋</Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
+        {medicines.filter(m => m.is_available).length === 0 && (
+          <Text style={styles.noResults}>No available products found.</Text>
+        )}
       </ScrollView>
     </ScrollView>
   );

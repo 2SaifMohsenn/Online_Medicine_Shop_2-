@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password, check_password
 
 # Create your views here.
 from rest_framework import viewsets, status
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Medicine, User, Admin, Order, OrderItem
@@ -11,6 +12,7 @@ from .serializers import MedicineSerializer, UserSerializer, AdminSerializer, Or
 class MedicineViewSet(viewsets.ModelViewSet):
     queryset = Medicine.objects.all()
     serializer_class = MedicineSerializer
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -37,16 +39,25 @@ def signup(request):
     """
     try:
         data = request.data
-        name = data.get('name', '')
+        first_name = data.get('first_name', '')
+        last_name = data.get('last_name', '')
         email = data.get('email', '')
         password = data.get('password', '')
         phone = data.get('phone', '')
         address = data.get('address', '')
 
+        # Fallback to 'name' field if first_name/last_name are missing (backward compatibility)
+        if not first_name:
+            name = data.get('name', '')
+            if name:
+                name_parts = name.strip().split(' ', 1)
+                first_name = name_parts[0]
+                last_name = name_parts[1] if len(name_parts) > 1 else last_name
+
         # Validate required fields
-        if not name or not email or not password:
+        if not first_name or not email or not password:
             return Response(
-                {'error': 'Name, email, and password are required'},
+                {'error': 'First name, email, and password are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -56,11 +67,6 @@ def signup(request):
                 {'error': 'A user with this email already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # Split name into first and last name
-        name_parts = name.strip().split(' ', 1)
-        first_name = name_parts[0]
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
 
         # Create user with hashed password
         user = User.objects.create(
