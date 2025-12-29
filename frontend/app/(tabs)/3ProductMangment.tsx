@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL, getImageUrl } from '@/constants/api';
@@ -38,6 +39,7 @@ type FormData = {
 const CATEGORIES = ['Vitamins', 'Hair Care', 'Pain Relief', 'Cold & Flu'];
 
 export default function AdminProducts() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -286,7 +288,12 @@ export default function AdminProducts() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Product Management</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Product Management</Text>
+        <TouchableOpacity style={styles.dashboardBtn} onPress={() => router.push('/3AdminDashboard')}>
+          <Text style={styles.dashboardBtnText}>Dashboard</Text>
+        </TouchableOpacity>
+      </View>
 
       <TextInput
         style={styles.searchInput}
@@ -455,7 +462,10 @@ export default function AdminProducts() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#F7F8FA' },
   centered: { justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 10, color: '#1F2937' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  title: { fontSize: 22, fontWeight: 'bold', color: '#1F2937' },
+  dashboardBtn: { backgroundColor: '#2E8BC0', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  dashboardBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 
   searchInput: {
     backgroundColor: '#fff',

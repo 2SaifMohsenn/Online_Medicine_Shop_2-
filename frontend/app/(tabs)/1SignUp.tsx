@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -11,9 +11,13 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Animated,
+  Dimensions
 } from 'react-native';
 import { signup } from '@/constants/api';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
 
 export default function SignupPage() {
   const router = useRouter();
@@ -27,6 +31,25 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
+
   const handleSignup = async () => {
     if (!firstName || !lastName || !email || !password || !address || !phone) {
       Alert.alert('Error', 'Please fill all required fields');
@@ -38,10 +61,9 @@ export default function SignupPage() {
       return;
     }
 
-    // Email validation: must include @ and .
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address (including @ and .)');
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
@@ -58,14 +80,9 @@ export default function SignupPage() {
       });
 
       Alert.alert(
-        'Signup Successful',
-        `Welcome, ${response.user?.first_name}! Please login to continue.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => router.push('/'),
-          },
-        ]
+        'Success',
+        `Welcome, ${response.user?.first_name}! Your account has been created.`,
+        [{ text: 'Login Now', onPress: () => router.push('/') }]
       );
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Signup failed';
@@ -78,148 +95,162 @@ export default function SignupPage() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={styles.flex}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="person-add" size={40} color="#2E8BC0" />
-          </View>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join PharMe family today</Text>
-        </View>
-
-        <View style={styles.card}>
-          {/* First Name Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="First Name*"
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          {/* Last Name Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Last Name*"
-              value={lastName}
-              onChangeText={setLastName}
-              placeholderTextColor="#9CA3AF"
-            />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View
+          style={[
+            styles.container,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          <View style={styles.header}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="medical" size={40} color="#2E8BC0" />
+            </View>
+            <Text style={styles.title}>Join PharMe</Text>
+            <Text style={styles.subtitle}>Create an account to start shopping</Text>
           </View>
 
-          {/* Email Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email Address*"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="none"
-            />
-          </View>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <View style={[styles.inputWrapper, { flex: 1, marginRight: 10 }]}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="First Name"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  placeholderTextColor="#94a3b8"
+                />
+              </View>
+              <View style={[styles.inputWrapper, { flex: 1 }]}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  placeholderTextColor="#94a3b8"
+                />
+              </View>
+            </View>
 
-          {/* Password Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="lock-closed-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { flex: 1 }]}
-              placeholder="Password*"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              placeholderTextColor="#9CA3AF"
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={20}
-                color="#6B7280"
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email Address"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor="#94a3b8"
+                autoCapitalize="none"
               />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#94a3b8"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#64748b"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="call-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Phone (11 digits)"
+                keyboardType="numeric"
+                value={phone}
+                onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
+                placeholderTextColor="#94a3b8"
+                maxLength={11}
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="location-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Delivery Address"
+                value={address}
+                onChangeText={setAddress}
+                placeholderTextColor="#94a3b8"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+              onPress={handleSignup}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.signupText}>Create Account</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.loginLink}
+              onPress={() => router.push('/')}
+            >
+              <Text style={styles.loginLinkText}>
+                Already have an account? <Text style={styles.loginLinkBold}>Login</Text>
+              </Text>
             </TouchableOpacity>
           </View>
-
-          {/* Phone Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="call-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number (11 digits)*"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
-              placeholderTextColor="#9CA3AF"
-              maxLength={11}
-            />
-          </View>
-
-          {/* Address Field */}
-          <View style={styles.inputWrapper}>
-            <Ionicons name="location-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Delivery Address*"
-              value={address}
-              onChangeText={setAddress}
-              placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
-            onPress={handleSignup}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.signupText}>Sign Up</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.loginLink}
-            onPress={() => router.push('/')}
-          >
-            <Text style={styles.loginLinkText}>
-              Already have an account? <Text style={styles.loginLinkBold}>Login</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ height: 40 }} />
+        </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#f8fafc',
   },
   scrollContent: {
-    padding: 24,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: '100%',
+    maxWidth: 450,
+    alignItems: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 30,
   },
   iconCircle: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: '#fff',
+    borderRadius: 24,
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -231,42 +262,48 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111827',
+    fontWeight: '800',
+    color: '#1e293b',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#64748b',
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#000',
+    width: '100%',
+    shadowColor: '#0f172a',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.05,
     shadowRadius: 20,
     elevation: 10,
   },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    backgroundColor: '#f1f5f9',
     borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    height: 56,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    height: 54,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#111827',
+    color: '#0f172a',
   },
   signupButton: {
     backgroundColor: '#2E8BC0',
@@ -274,19 +311,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 10,
     shadowColor: '#2E8BC0',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowRadius: 10,
+    elevation: 4,
   },
   signupButtonDisabled: {
-    opacity: 0.7,
+    backgroundColor: '#94a3b8',
+    elevation: 0,
+    shadowOpacity: 0,
   },
   signupText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: '#ffffff',
+    fontWeight: '700',
     fontSize: 18,
   },
   loginLink: {
@@ -295,11 +334,11 @@ const styles = StyleSheet.create({
   },
   loginLinkText: {
     fontSize: 15,
-    color: '#6B7280',
+    color: '#64748b',
   },
   loginLinkBold: {
     color: '#2E8BC0',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
 });
 

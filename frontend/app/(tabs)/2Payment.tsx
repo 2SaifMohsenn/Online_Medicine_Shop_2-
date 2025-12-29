@@ -159,9 +159,15 @@ export default function PaymentPage() {
         <TextInput
           style={styles.input}
           placeholder="e.g. 01234567890"
-          keyboardType="phone-pad"
+          keyboardType="numeric"
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={(text) => {
+            const numericValue = text.replace(/[^0-9]/g, '');
+            if (numericValue.length <= 11) {
+              setPhone(numericValue);
+            }
+          }}
+          maxLength={11}
         />
 
         <Text style={styles.inputLabel}>Delivery Address *</Text>
