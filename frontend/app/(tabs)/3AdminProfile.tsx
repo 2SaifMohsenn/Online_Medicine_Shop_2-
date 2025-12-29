@@ -122,6 +122,12 @@ export default function AdminProfile() {
           <Text style={styles.email}>{email}</Text>
         </View>
 
+        <TouchableOpacity
+          style={styles.dashboardButton}
+          onPress={() => router.push('/3AdminDashboard')}>
+          <Text style={styles.dashboardText}>Dashboard</Text>
+        </TouchableOpacity>
+
         {/* Logout Button */}
         <TouchableOpacity
           style={styles.logoutButton}
@@ -285,6 +291,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoutText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  dashboardButton: {
+    backgroundColor: '#2E8BC0',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  dashboardText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,

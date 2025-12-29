@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRouter } from 'expo-router';
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
@@ -21,6 +22,7 @@ interface User {
 }
 
 export default function AdminUsers() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -51,7 +53,12 @@ export default function AdminUsers() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Admin – View Users</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>Admin – View Users</Text>
+        <TouchableOpacity style={styles.dashboardBtn} onPress={() => router.push('/3AdminDashboard')}>
+          <Text style={styles.dashboardBtnText}>Dashboard</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Search Bar */}
       <TextInput
@@ -130,11 +137,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
     padding: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#2E8BC0",
-    marginBottom: 10,
+  },
+  dashboardBtn: {
+    backgroundColor: '#2E8BC0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  dashboardBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   searchInput: {
     backgroundColor: "white",

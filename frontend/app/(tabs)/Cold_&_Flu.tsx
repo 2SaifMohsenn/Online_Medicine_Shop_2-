@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState, useRef } from 'react';
 import {
   ActivityIndicator,
@@ -22,6 +23,7 @@ interface Product {
 }
 
 export default function ColdFluPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -73,7 +75,12 @@ export default function ColdFluPage() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Cold & Flu</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Cold & Flu</Text>
+        <TouchableOpacity style={styles.homeBtn} onPress={() => router.push('/HomePage')}>
+          <Text style={styles.homeBtnText}>Home</Text>
+        </TouchableOpacity>
+      </View>
       {products.length === 0 ? (
         <Text style={styles.emptyText}>No products available in this category</Text>
       ) : (
@@ -127,4 +134,7 @@ const styles = StyleSheet.create({
   button: { backgroundColor: '#2E8BC0', paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   buttonDisabled: { backgroundColor: '#B0BEC5' },
   buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
+  homeBtn: { backgroundColor: '#2E8BC0', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  homeBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 });

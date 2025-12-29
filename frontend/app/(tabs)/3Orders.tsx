@@ -8,6 +8,7 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from 'expo-router';
 import { useFocusEffect } from "@react-navigation/native";
 import { API_BASE_URL } from "@/constants/api";
 
@@ -31,6 +32,7 @@ interface OrderData {
 }
 
 export default function AdminOrders() {
+  const router = useRouter();
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -145,7 +147,12 @@ export default function AdminOrders() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Orders Management</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>Orders Management</Text>
+        <TouchableOpacity style={styles.dashboardBtn} onPress={() => router.push('/3AdminDashboard')}>
+          <Text style={styles.dashboardBtnText}>Dashboard</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.subHeader}>{orders.length} total orders</Text>
 
       {orders.length === 0 ? (
@@ -269,11 +276,27 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#6B7280",
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333333",
-    marginBottom: 4,
+  },
+  dashboardBtn: {
+    backgroundColor: '#2E8BC0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  dashboardBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   subHeader: {
     fontSize: 14,

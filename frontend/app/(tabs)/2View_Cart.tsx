@@ -120,6 +120,13 @@ export default function ViewCart() {
           >
             <Text style={styles.checkoutText}>Proceed to Payment</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={() => router.push('/HomePage')}
+          >
+            <Text style={styles.homeButtonText}>Back to Home</Text>
+          </TouchableOpacity>
         </>
       )}
     </ScrollView>
@@ -276,6 +283,20 @@ const styles = StyleSheet.create({
   },
   checkoutText: {
     color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16
+  },
+  homeButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: '#2E8BC0',
+  },
+  homeButtonText: {
+    color: '#2E8BC0',
     fontWeight: 'bold',
     fontSize: 16
   },

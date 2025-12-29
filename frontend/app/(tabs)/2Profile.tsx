@@ -1,4 +1,5 @@
 
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,6 +15,7 @@ import { getUser, saveUser } from '@/constants/userStorage';
 import { updateUserProfile, changePassword } from '@/constants/api';
 
 export default function UserProfile() {
+  const router = useRouter();
   const storedUser = getUser();
 
   // Editable fields state
@@ -227,6 +229,13 @@ export default function UserProfile() {
             <Text style={styles.saveButtonText}>Update Password</Text>
           )}
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => router.push('/HomePage')}
+        >
+          <Text style={styles.homeButtonText}>Back to Home</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -336,6 +345,18 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  homeButton: {
+    backgroundColor: '#2E8BC0',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  homeButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',

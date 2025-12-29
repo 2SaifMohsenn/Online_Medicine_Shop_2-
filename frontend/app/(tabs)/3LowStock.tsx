@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_BASE_URL } from '@/constants/api';
 
@@ -24,6 +25,7 @@ type Product = {
 };
 
 export default function LowStockPage() {
+    const router = useRouter();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [restockValues, setRestockValues] = useState<{ [key: number]: string }>({});
@@ -104,7 +106,12 @@ export default function LowStockPage() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Inventory Alert: Low Stock</Text>
+            <View style={styles.headerRow}>
+                <Text style={styles.title}>Inventory Alert: Low Stock</Text>
+                <TouchableOpacity style={styles.dashboardBtn} onPress={() => router.push('/3AdminDashboard')}>
+                    <Text style={styles.dashboardBtnText}>Dashboard</Text>
+                </TouchableOpacity>
+            </View>
             <Text style={styles.subtitle}>Below 10 units available</Text>
 
             <FlatList
@@ -154,7 +161,10 @@ export default function LowStockPage() {
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: '#F9FAFB' },
     centered: { justifyContent: 'center', alignItems: 'center' },
-    title: { fontSize: 24, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+    title: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
+    dashboardBtn: { backgroundColor: '#2E8BC0', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+    dashboardBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
     subtitle: { fontSize: 14, color: '#EF4444', fontWeight: '600', marginBottom: 16 },
 
     card: {
