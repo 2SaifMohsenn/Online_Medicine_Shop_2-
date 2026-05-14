@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   View,
   Animated,
-  Dimensions
+  Dimensions,
+  Image,
 } from 'react-native';
 import { signup } from '@/constants/api';
 import { Ionicons } from '@expo/vector-icons';
@@ -97,6 +98,14 @@ export default function SignupPage() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.flex}
     >
+      <Image
+        source={require('@/assets/images/shampoo.jpg')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+        blurRadius={14}
+      />
+      <View style={styles.tintOverlay} />
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -113,7 +122,11 @@ export default function SignupPage() {
         >
           <View style={styles.header}>
             <View style={styles.iconCircle}>
-              <Ionicons name="medical" size={40} color="#2E8BC0" />
+              <Image
+                source={require('@/assets/images/logo.png')}
+                style={styles.logoCircle}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.title}>Join PharMe</Text>
             <Text style={styles.subtitle}>Create an account to start shopping</Text>
@@ -142,58 +155,58 @@ export default function SignupPage() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
                 keyboardType="email-address"
                 value={email}
                 onChangeText={setEmail}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
                 autoCapitalize="none"
               />
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
-                  color="#64748b"
+                  color="#e6f2ff"
                 />
               </TouchableOpacity>
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons name="call-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="call-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Phone (11 digits)"
                 keyboardType="numeric"
                 value={phone}
                 onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
                 maxLength={11}
               />
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons name="location-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="location-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Delivery Address"
                 value={address}
                 onChangeText={setAddress}
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
               />
             </View>
 
@@ -228,7 +241,7 @@ export default function SignupPage() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#071524',
   },
   scrollContent: {
     paddingVertical: 40,
@@ -236,6 +249,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   container: {
     width: '100%',
@@ -249,38 +263,44 @@ const styles = StyleSheet.create({
   iconCircle: {
     width: 80,
     height: 80,
-    borderRadius: 24,
-    backgroundColor: '#ffffff',
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    shadowColor: '#2E8BC0',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
+    elevation: 8,
+    overflow: 'hidden',
+  },
+  logoCircle: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 45,
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#e6f7ff',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: 'rgba(230,242,255,0.85)',
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 20,
     padding: 24,
     width: '100%',
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 12,
   },
   row: {
     flexDirection: 'row',
@@ -289,34 +309,34 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
+    paddingHorizontal: 14,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    height: 54,
+    borderColor: 'rgba(255,255,255,0.12)',
+    height: 56,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#0f172a',
+    color: '#eaf6ff',
   },
   signupButton: {
-    backgroundColor: '#2E8BC0',
+    backgroundColor: '#007BFF',
     height: 56,
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: '#2E8BC0',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowColor: '#007BFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 6,
   },
   signupButtonDisabled: {
     backgroundColor: '#94a3b8',
@@ -325,7 +345,7 @@ const styles = StyleSheet.create({
   },
   signupText: {
     color: '#ffffff',
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 18,
   },
   loginLink: {
@@ -334,22 +354,27 @@ const styles = StyleSheet.create({
   },
   loginLinkText: {
     fontSize: 15,
-    color: '#64748b',
+    color: 'rgba(230,242,255,0.9)',
   },
   loginLinkBold: {
-    color: '#2E8BC0',
+    color: '#39E6A2',
     fontWeight: '700',
   },
+  backgroundImage: {
+    position: 'absolute',
+    width: '140%',
+    height: '140%',
+    top: '-20%',
+    left: '-20%',
+    zIndex: -2,
+  },
+  tintOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(3,34,54,0.45)',
+    zIndex: -1,
+  },
 });
-
-
-
-
-
-
-
-
-
-
-
-

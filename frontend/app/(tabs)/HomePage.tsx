@@ -14,7 +14,7 @@ import { getUser } from '@/constants/userStorage';
 import { getCart, saveCart } from '@/constants/cartStorage';
 import { API_BASE_URL, getImageUrl } from '@/constants/api';
 
-const logoImage = require('@/assets/images/Logo.png');
+const logoImage = require('@/assets/images/logo.png');
 
 interface Medicine {
   id: number;
