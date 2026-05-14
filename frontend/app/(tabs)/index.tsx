@@ -1,8 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { login } from '@/constants/api';
 import { saveUser, clearUser } from '@/constants/userStorage';
-import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -16,7 +14,8 @@ import {
   Animated,
   Dimensions,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -89,7 +88,15 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.flex}
     >
-      <ThemedView style={styles.container}>
+      <View style={styles.container}>
+        <Image
+          source={require('@/assets/images/shampoo1.jpg')}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+          blurRadius={14}
+        />
+        <View style={styles.tintOverlay} />
+
         <Animated.View
           style={[
             styles.card,
@@ -101,9 +108,9 @@ export default function LoginScreen() {
         >
           <View style={styles.logoContainer}>
             <Image
-              source={require('@/assets/images/Logo.png')}
+              source={require('@/assets/images/logo.png')}
               style={styles.logo}
-              contentFit="contain"
+              resizeMode="contain"
             />
           </View>
 
@@ -116,11 +123,11 @@ export default function LoginScreen() {
 
           <View style={styles.inputGroup}>
             <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="mail-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -129,11 +136,11 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={20} color="#64748b" style={styles.inputIcon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#e6f2ff" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor="#94a3b8"
+                placeholderTextColor="rgba(230,242,255,0.6)"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -142,30 +149,25 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}
-                  color="#64748b"
+                  color="#e6f2ff"
                 />
               </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.forgotPassword}
-            onPress={() => Alert.alert('Coming Soon', 'Password reset feature is being developed.')}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={isLoading}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.loginButtonText}>Login</Text>
             )}
+            <View style={styles.mintAccent} pointerEvents="none" />
           </TouchableOpacity>
 
           <View style={styles.footer}>
@@ -175,7 +177,7 @@ export default function LoginScreen() {
             </Link>
           </View>
         </Animated.View>
-      </ThemedView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -186,48 +188,52 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#071524',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 20,
     paddingVertical: 40,
-    paddingHorizontal: 25,
+    paddingHorizontal: 28,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 520,
     alignItems: 'center',
-    shadowColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 8,
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 12,
   },
   logoContainer: {
     width: 90,
     height: 90,
-    borderRadius: 25,
-    backgroundColor: '#eff6ff',
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     padding: 15,
     marginBottom: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   logo: {
     width: '100%',
     height: '100%',
+    borderRadius: 45,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '800',
-    color: '#1e293b',
+    color: '#e6f7ff',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#64748b',
+    color: 'rgba(230,242,255,0.85)',
     textAlign: 'center',
     marginBottom: 30,
     lineHeight: 22,
@@ -239,42 +245,42 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
+    paddingHorizontal: 14,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    height: 54,
+    borderColor: 'rgba(255,255,255,0.12)',
+    height: 56,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#0f172a',
+    color: '#eaf6ff',
   },
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 25,
   },
   forgotPasswordText: {
-    color: '#2E8BC0',
+    color: '#007BFF',
     fontSize: 14,
     fontWeight: '600',
   },
   loginButton: {
-    backgroundColor: '#2E8BC0',
-    borderRadius: 12,
+    backgroundColor: '#007BFF',
+    borderRadius: 16,
     paddingVertical: 16,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#2E8BC0',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowColor: '#007BFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    elevation: 6,
   },
   loginButtonDisabled: {
     backgroundColor: '#94a3b8',
@@ -283,9 +289,18 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#ffffff',
-    fontWeight: '700',
-    fontSize: 17,
-    letterSpacing: 0.5,
+    fontWeight: '800',
+    fontSize: 18,
+    letterSpacing: 0.4,
+  },
+  mintAccent: {
+    position: 'absolute',
+    right: 6,
+    top: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(57,230,162,0.14)'
   },
   footer: {
     flexDirection: 'row',
@@ -294,11 +309,28 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 15,
-    color: '#64748b',
+    color: 'rgba(230,242,255,0.9)',
   },
   signupLink: {
     fontSize: 15,
-    color: '#2E8BC0',
+    color: '#39E6A2',
     fontWeight: '700',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '140%',
+    height: '140%',
+    top: '-20%',
+    left: '-20%',
+    zIndex: -2,
+  },
+  tintOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(3,34,54,0.45)',
+    zIndex: -1,
   },
 });
