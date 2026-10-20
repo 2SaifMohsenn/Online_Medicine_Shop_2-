@@ -250,6 +250,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
 export interface OrderItem {
     medicine_id: number;
+    name?: string;
     quantity: number;
     price: number;
 }

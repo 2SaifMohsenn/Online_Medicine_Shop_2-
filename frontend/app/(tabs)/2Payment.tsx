@@ -85,6 +85,7 @@ export default function PaymentPage() {
       // Prepare order items for API
       const orderItems = cartItems.map(item => ({
         medicine_id: Number(item.id),
+        name: item.name,
         quantity: Number(item.quantity),
         price: Number(item.price), // backend calculates total_price per item usually, or receives unit price
       }));

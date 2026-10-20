@@ -398,14 +398,32 @@ def create_order(request):
                 
                 try:
                     medicine = Medicine.objects.select_for_update().get(id=medicine_id)
-                    if medicine.stock < qty_ordered:
+                except (Medicine.DoesNotExist, ValueError, TypeError):
+                    # Fallback to name-based lookup
+                    med_name = item.get('name', '')
+                    if not med_name:
                         return Response({
-                            'error': f'Insufficient stock for {medicine.name}. Available: {medicine.stock}, Ordered: {qty_ordered}'
-                        }, status=status.HTTP_400_BAD_REQUEST)
+                            'error': f'Medicine with ID {medicine_id} not found and no name provided'
+                        }, status=status.HTTP_404_NOT_FOUND)
                     
-                    medicines_to_update.append((medicine, qty_ordered))
-                except Medicine.DoesNotExist:
-                    return Response({'error': f'Medicine with ID {medicine_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+                    # Clean prefix [Rx] if present
+                    clean_name = med_name
+                    if clean_name.startswith('[Rx] '):
+                        clean_name = clean_name[5:]
+                    
+                    try:
+                        medicine = Medicine.objects.select_for_update().get(name__iexact=clean_name.strip())
+                    except Medicine.DoesNotExist:
+                        return Response({
+                            'error': f'Medicine "{clean_name}" is not available in the pharmacy inventory'
+                        }, status=status.HTTP_404_NOT_FOUND)
+                
+                if medicine.stock < qty_ordered:
+                    return Response({
+                        'error': f'Insufficient stock for {medicine.name}. Available: {medicine.stock}, Ordered: {qty_ordered}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                medicines_to_update.append((medicine, qty_ordered))
 
             # 2. Execution Phase: Create Order and Items, and Update Stock
             order = Order.objects.create(

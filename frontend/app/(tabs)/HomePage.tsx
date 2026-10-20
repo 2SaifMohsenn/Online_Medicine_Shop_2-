@@ -114,6 +114,11 @@ export default function HomePage() {
           <TouchableOpacity onPress={() => router.push('/2View_Cart')}>
             <Text style={styles.navItem}>Cart</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/ClinicPrescriptions')}>
+            <Text style={[styles.navItem, styles.navItemClinic]}>🏥 Clinic Rx</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={() => router.push('/')}>
             <Text style={styles.navItem}>Logout</Text>
           </TouchableOpacity>
@@ -135,6 +140,24 @@ export default function HomePage() {
           onChangeText={setSearchQuery}
         />
       </View>
+
+      {/* ─── Interoperability Banner ─── */}
+      <TouchableOpacity
+        style={styles.clinicBanner}
+        onPress={() => router.push('/ClinicPrescriptions')}
+        activeOpacity={0.85}
+      >
+        <View style={styles.clinicBannerIcon}>
+          <Text style={{ fontSize: 28 }}>🏥</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.clinicBannerTitle}>Have a Dental Clinic Prescription?</Text>
+          <Text style={styles.clinicBannerSub}>
+            Connect to NU-HOSPITAL — view &amp; fill your FHIR prescription here.
+          </Text>
+        </View>
+        <Text style={styles.clinicBannerArrow}>›</Text>
+      </TouchableOpacity>
 
       {/* Search Results - Only show when there's a search query */}
       {searchQuery.length > 0 && (
@@ -256,6 +279,50 @@ const styles = StyleSheet.create({
   navItem: {
     fontSize: 15,
     color: '#374151',
+    fontWeight: '600',
+  },
+  navItemClinic: {
+    color: '#2E8BC0',
+    fontWeight: '700',
+  },
+  clinicBanner: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1.5,
+    borderColor: '#BFDBFE',
+    shadowColor: '#2E8BC0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  clinicBannerIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#EFF6FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clinicBannerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1D4ED8',
+    marginBottom: 3,
+  },
+  clinicBannerSub: {
+    fontSize: 12,
+    color: '#6B7280',
+    lineHeight: 17,
+  },
+  clinicBannerArrow: {
+    fontSize: 24,
+    color: '#93C5FD',
     fontWeight: '600',
   },
 
